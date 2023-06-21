@@ -18,4 +18,6 @@ about:
 
 I am Miguel Antonio H. Germar, but you can call me Migs. I am a second year college student from Quezon City, Philippines. Currently, I am in my second year in the BS Applied Mathematics - Master in Data Science program in Ateneo de Manila University. I'm interested in pursuing a career in data science, so I set up this website as a blog and portfolio for my projects.
 
-You can email me at [migs.germar@gmail.com](mailto:migs.germar@gmail.com).
+Resume: [PDF](https://drive.google.com/file/d/1tJgDUCSdO9u3eYyWxUgGIjnVLM9yeldb/view?usp=sharing)
+
+Email: [migs.germar@gmail.com](mailto:migs.germar@gmail.com).
