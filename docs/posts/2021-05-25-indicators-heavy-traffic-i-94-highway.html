@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Migs Germar">
+<meta name="dcterms.date" content="2021-05-25">
+<meta name="description" content="I conduct exploratory data analysis and Seaborn visualizations in order to find indicators of heavy traffic on I-94.">
+
+<title>Migs Germar’s Data Science Blog - Indicators of Heavy Traffic on the I-94 Highway</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../posts/images/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Migs Germar’s Data Science Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MiguelAHG" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/migs-germar/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.facebook.com/miguelantonio.germar" rel="" target=""><i class="bi bi-facebook" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Indicators of Heavy Traffic on the I-94 Highway</h1>
+                  <div>
+        <div class="description">
+          I conduct exploratory data analysis and Seaborn visualizations in order to find indicators of heavy traffic on I-94.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">matplotlib</div>
+                <div class="quarto-category">seaborn</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Migs Germar </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 25, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#package-installs" id="toc-package-installs" class="nav-link" data-scroll-target="#package-installs">Package Installs</a></li>
+  <li><a href="#data-overview" id="toc-data-overview" class="nav-link" data-scroll-target="#data-overview">Data Overview</a></li>
+  <li><a href="#data-cleaning" id="toc-data-cleaning" class="nav-link" data-scroll-target="#data-cleaning">Data Cleaning</a>
+  <ul class="collapse">
+  <li><a href="#duplicate-entries" id="toc-duplicate-entries" class="nav-link" data-scroll-target="#duplicate-entries">Duplicate Entries</a></li>
+  <li><a href="#descriptive-statistics" id="toc-descriptive-statistics" class="nav-link" data-scroll-target="#descriptive-statistics">Descriptive Statistics</a></li>
+  <li><a href="#temperature-outliers" id="toc-temperature-outliers" class="nav-link" data-scroll-target="#temperature-outliers">Temperature Outliers</a></li>
+  <li><a href="#rain-level-outliers" id="toc-rain-level-outliers" class="nav-link" data-scroll-target="#rain-level-outliers">Rain Level Outliers</a></li>
+  <li><a href="#traffic-volume-outliers" id="toc-traffic-volume-outliers" class="nav-link" data-scroll-target="#traffic-volume-outliers">Traffic Volume Outliers</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#traffic-volume-day-vs.-night" id="toc-traffic-volume-day-vs.-night" class="nav-link" data-scroll-target="#traffic-volume-day-vs.-night">Traffic Volume: Day vs.&nbsp;Night</a></li>
+  <li><a href="#effect-of-units-of-time" id="toc-effect-of-units-of-time" class="nav-link" data-scroll-target="#effect-of-units-of-time">Effect of Units of Time</a>
+  <ul class="collapse">
+  <li><a href="#by-month" id="toc-by-month" class="nav-link" data-scroll-target="#by-month">By Month</a></li>
+  <li><a href="#by-day-of-the-week" id="toc-by-day-of-the-week" class="nav-link" data-scroll-target="#by-day-of-the-week">By Day of the Week</a></li>
+  <li><a href="#by-hour-of-the-day" id="toc-by-hour-of-the-day" class="nav-link" data-scroll-target="#by-hour-of-the-day">By Hour of the Day</a></li>
+  </ul></li>
+  <li><a href="#effect-of-weather" id="toc-effect-of-weather" class="nav-link" data-scroll-target="#effect-of-weather">Effect of Weather</a>
+  <ul class="collapse">
+  <li><a href="#numerical-weather-columns" id="toc-numerical-weather-columns" class="nav-link" data-scroll-target="#numerical-weather-columns">Numerical Weather Columns</a></li>
+  <li><a href="#categorical-weather-columns" id="toc-categorical-weather-columns" class="nav-link" data-scroll-target="#categorical-weather-columns">Categorical Weather Columns</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/2021-05-25-highway-traffic.jpg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<center>
+<a href="https://unsplash.com/photos/Xbh_OGLRfUM">Unsplash | Alexander Popov</a>
+</center>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>Interstate 94 or I-94 is a <a href="https://midamericafreight.org/index.php/rfs/network-inventory/corridors/profiles/i-94/">highway in the USA</a> that stretches from Montana in the west to Michigan in the east. In 2019, John Hogue donated a dataset of traffic volume, weather, and holiday data on I-94 from 2012 to 2018. This can be found on the following UCI Machine Learning Repository page: <a href="https://archive.ics.uci.edu/ml/datasets/Metro+Interstate+Traffic+Volume">Metro Interstate Traffic Volume Data Set</a>.</p>
+<p>The goal of this project is to determine possible indicators of heavy traffic on I-94. Exploratory data analysis will be conducted with Seaborn visualizations.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I wrote this notebook for the <a href="https://www.dataquest.io/">Dataquest</a> course’s <a href="https://app.dataquest.io/m/524/guided-project%3A-finding-heavy-traffic-indicators-on-i-94/10/next-steps">Guided Project: Finding Heavy Traffic Indicators on I-94</a>. The general project flow and research questions came from Dataquest. However, all of the text and code here are written by me unless stated otherwise.</p>
+</div>
+</div>
+</section>
+<section id="package-installs" class="level1">
+<h1>Package Installs</h1>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="data-overview" class="level1">
+<h1>Data Overview</h1>
+<p>The following details about the I-94 dataset are stated in the <a href="https://archive.ics.uci.edu/ml/datasets/Metro+Interstate+Traffic+Volume">archive</a>.</p>
+<ul>
+<li><code>holiday</code>: Categorical; US National holidays plus regional holiday, Minnesota State Fair</li>
+<li><code>temp</code>: Numeric; Average temperature (Kelvin)</li>
+<li><code>rain_1h</code>: Numeric; Amount (mm) of rain that occurred in the hour</li>
+<li><code>snow_1h</code>: Numeric; Amount (mm) of snow that occurred in the hour</li>
+<li><code>clouds_all</code>: Numeric; Percentage of cloud cover (%)</li>
+<li><code>weather_main</code>: Categorical; Short textual description of the current weather</li>
+<li><code>weather_description</code>: Categorical; Longer textual description of the current weather</li>
+<li><code>date_time</code>: DateTime; Hour of the data collected in local CST time</li>
+<li><code>traffic_volume</code>: Numeric; Hourly I-94 ATR 301 reported westbound traffic volume</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The data were collected from a station somewhere between Minneapolis and St.&nbsp;Paul, Minnesota. Only westbound traffic was recorded, not eastbound. The data are not representative of the entire I-94 highway.</p>
+</div>
+</div>
+<p>Below are the first few rows of the dataset.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>highway <span class="op">=</span> pd.read_csv(<span class="st">"./private/2021-05-25-IHT-Files/Metro_Interstate_Traffic_Volume.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>highway.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">holiday</th>
+<th data-quarto-table-cell-role="th">temp</th>
+<th data-quarto-table-cell-role="th">rain_1h</th>
+<th data-quarto-table-cell-role="th">snow_1h</th>
+<th data-quarto-table-cell-role="th">clouds_all</th>
+<th data-quarto-table-cell-role="th">weather_main</th>
+<th data-quarto-table-cell-role="th">weather_description</th>
+<th data-quarto-table-cell-role="th">date_time</th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>None</td>
+<td>288.28</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>40</td>
+<td>Clouds</td>
+<td>scattered clouds</td>
+<td>2012-10-02 09:00:00</td>
+<td>5545</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>None</td>
+<td>289.36</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>75</td>
+<td>Clouds</td>
+<td>broken clouds</td>
+<td>2012-10-02 10:00:00</td>
+<td>4516</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>None</td>
+<td>289.58</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>90</td>
+<td>Clouds</td>
+<td>overcast clouds</td>
+<td>2012-10-02 11:00:00</td>
+<td>4767</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>None</td>
+<td>290.13</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>90</td>
+<td>Clouds</td>
+<td>overcast clouds</td>
+<td>2012-10-02 12:00:00</td>
+<td>5026</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>None</td>
+<td>291.14</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>75</td>
+<td>Clouds</td>
+<td>broken clouds</td>
+<td>2012-10-02 13:00:00</td>
+<td>4918</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>There are columns about the date, traffic volume, weather, and occurrence of holidays. With this dataset, one could determine how traffic or weather changed over time. One could also determine how weather and holidays affected traffic volume.</p>
+<p>Let us view the information on each column below.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>highway.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 48204 entries, 0 to 48203
+Data columns (total 9 columns):
+ #   Column               Non-Null Count  Dtype  
+---  ------               --------------  -----  
+ 0   holiday              48204 non-null  object 
+ 1   temp                 48204 non-null  float64
+ 2   rain_1h              48204 non-null  float64
+ 3   snow_1h              48204 non-null  float64
+ 4   clouds_all           48204 non-null  int64  
+ 5   weather_main         48204 non-null  object 
+ 6   weather_description  48204 non-null  object 
+ 7   date_time            48204 non-null  object 
+ 8   traffic_volume       48204 non-null  int64  
+dtypes: float64(3), int64(2), object(4)
+memory usage: 3.3+ MB</code></pre>
+</div>
+</div>
+<p>It turns out that most of the numeric columns are <code>float64</code>, which refers to decimal numbers.</p>
+<p>The integer columns are <code>clouds_all</code>, which is in percentage, and <code>traffic volume</code>, which tells the number of cars.</p>
+<p>The <code>date_time</code> column is listed as an <code>object</code> or text column. Let’s convert this to <code>datetime</code> format for ease of use.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>highway[<span class="st">"date_time"</span>] <span class="op">=</span> pd.to_datetime(highway[<span class="st">"date_time"</span>])</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>highway[<span class="st">"date_time"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>0       2012-10-02 09:00:00
+1       2012-10-02 10:00:00
+2       2012-10-02 11:00:00
+3       2012-10-02 12:00:00
+4       2012-10-02 13:00:00
+                ...        
+48199   2018-09-30 19:00:00
+48200   2018-09-30 20:00:00
+48201   2018-09-30 21:00:00
+48202   2018-09-30 22:00:00
+48203   2018-09-30 23:00:00
+Name: date_time, Length: 48204, dtype: datetime64[ns]</code></pre>
+</div>
+</div>
+<p>Lastly, all of the Non-Null Counts match the total number of datapoints (48204). This could mean that there are no missing values in the dataset. It could also mean that missing values are expressed in a non-conventional way.</p>
+</section>
+<section id="data-cleaning" class="level1">
+<h1>Data Cleaning</h1>
+<section id="duplicate-entries" class="level2">
+<h2 class="anchored" data-anchor-id="duplicate-entries">Duplicate Entries</h2>
+<p>There may be duplicate entries, i.e., multiple entries for the same date and hour. These must be removed.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>highway.drop_duplicates(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    subset <span class="op">=</span> [<span class="st">"date_time"</span>],</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    keep <span class="op">=</span> <span class="st">"first"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    inplace <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>highway.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>(40575, 9)</code></pre>
+</div>
+</div>
+<p>There were 7629 duplicate entries removed from the original 48204 entries.</p>
+</section>
+<section id="descriptive-statistics" class="level2">
+<h2 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h2>
+<p>Next, we view the descriptive statistics in order to find abnormal values.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>highway.describe(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    include <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    datetime_is_numeric <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">holiday</th>
+<th data-quarto-table-cell-role="th">temp</th>
+<th data-quarto-table-cell-role="th">rain_1h</th>
+<th data-quarto-table-cell-role="th">snow_1h</th>
+<th data-quarto-table-cell-role="th">clouds_all</th>
+<th data-quarto-table-cell-role="th">weather_main</th>
+<th data-quarto-table-cell-role="th">weather_description</th>
+<th data-quarto-table-cell-role="th">date_time</th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>40575</td>
+<td>40575.000000</td>
+<td>40575.000000</td>
+<td>40575.000000</td>
+<td>40575.000000</td>
+<td>40575</td>
+<td>40575</td>
+<td>40575</td>
+<td>40575.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">unique</td>
+<td>12</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>11</td>
+<td>35</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">top</td>
+<td>None</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>Clouds</td>
+<td>sky is clear</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>40522</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>15123</td>
+<td>11642</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>NaN</td>
+<td>281.316763</td>
+<td>0.318632</td>
+<td>0.000117</td>
+<td>44.199162</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2015-12-23 22:16:28.835489792</td>
+<td>3290.650474</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>NaN</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2012-10-02 09:00:00</td>
+<td>0.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>NaN</td>
+<td>271.840000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2014-02-02 19:30:00</td>
+<td>1248.500000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>NaN</td>
+<td>282.860000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>40.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2016-06-02 14:00:00</td>
+<td>3427.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>NaN</td>
+<td>292.280000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>90.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2017-08-02 23:30:00</td>
+<td>4952.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>NaN</td>
+<td>310.070000</td>
+<td>9831.300000</td>
+<td>0.510000</td>
+<td>100.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2018-09-30 23:00:00</td>
+<td>7280.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>NaN</td>
+<td>13.816618</td>
+<td>48.812640</td>
+<td>0.005676</td>
+<td>38.683447</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1984.772909</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Most of the descriptives make sense, except for a few details:</p>
+<ul>
+<li>The minimum <code>temp</code> is 0 Kelvin. This is called <a href="https://www.britannica.com/science/absolute-zero">absolute zero</a>, the lowest possible temperature of any object, equivalent to <span class="math inline">\(-273.15^{\circ}\text{C}\)</span>. It is unreasonable for the I-94 highway to reach such a low temperature, even in winter.</li>
+<li>The maximum <code>rain_1h</code> is 9,831 mm, or 9.8 meters. Either this indicates a very high flood, or this is inaccurate.</li>
+<li>The minimum <code>traffic_volume</code> is 0 cars. This may be possible, but it is still best to inspect the data.</li>
+</ul>
+</section>
+<section id="temperature-outliers" class="level2">
+<h2 class="anchored" data-anchor-id="temperature-outliers">Temperature Outliers</h2>
+<p>Let us graph a boxplot in order to find outliers among the temperature values.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sns.boxplot(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> highway,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"temp"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Temperature on I-94 (Kelvin)"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Temperature (Kelvin)"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Indeed, most values fall between 250 Kelvin and 300 Kelvin (<span class="math inline">\(-23.15^{\circ}\text{C}\)</span> and <span class="math inline">\(26.85^{\circ}\text{C}\)</span>). The only outliers are at 0 Kelvin. This supports the idea that the zeroes are placeholders for missing values.</p>
+<p>How many missing values are there?</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(highway[<span class="st">"temp"</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a> .value_counts(bins <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a> .sort_index()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>(-0.311, 31.007]         10
+(31.007, 62.014]          0
+(62.014, 93.021]          0
+(93.021, 124.028]         0
+(124.028, 155.035]        0
+(155.035, 186.042]        0
+(186.042, 217.049]        0
+(217.049, 248.056]       99
+(248.056, 279.063]    17372
+(279.063, 310.07]     23094
+Name: temp, dtype: int64</code></pre>
+</div>
+</div>
+<p>Only 10 datapoints have zero-values in <code>temp</code>. Thus, these can be dropped from the dataset.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>highway <span class="op">=</span> highway.loc[highway[<span class="st">"temp"</span>] <span class="op">!=</span> <span class="dv">0</span>]</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>highway.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>(40565, 9)</code></pre>
+</div>
+</div>
+<p>Now, there are 40565 rows in the dataset. Temperature outliers have been removed.</p>
+</section>
+<section id="rain-level-outliers" class="level2">
+<h2 class="anchored" data-anchor-id="rain-level-outliers">Rain Level Outliers</h2>
+<p>Similarly, we graph a boxplot below for the <code>rain_1h</code> column.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sns.boxplot(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> highway,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"rain_1h"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Hourly Rain Level on I-94 (mm)"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Hourly Rain Level (mm)"</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Most of the values are close to 0 mm, and there are only a few outliers near 10,000 mm. How many outliers are there?</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>highway[<span class="st">"rain_1h"</span>].value_counts(bins <span class="op">=</span> <span class="dv">10</span>).sort_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>(-9.831999999999999, 983.13]    40564
+(983.13, 1966.26]                   0
+(1966.26, 2949.39]                  0
+(2949.39, 3932.52]                  0
+(3932.52, 4915.65]                  0
+(4915.65, 5898.78]                  0
+(5898.78, 6881.91]                  0
+(6881.91, 7865.04]                  0
+(7865.04, 8848.17]                  0
+(8848.17, 9831.3]                   1
+Name: rain_1h, dtype: int64</code></pre>
+</div>
+</div>
+<p>There is only 1 outlying datapoint. Since a 9.8 m flood level is so unrealistic given that most of the other values are small, this datapoint will be dropped.</p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>highway <span class="op">=</span> highway.loc[highway[<span class="st">"rain_1h"</span>] <span class="op">&lt;</span> <span class="dv">1000</span>]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>highway.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>(40564, 9)</code></pre>
+</div>
+</div>
+<p>The dataset is left with 40564 rows.</p>
+</section>
+<section id="traffic-volume-outliers" class="level2">
+<h2 class="anchored" data-anchor-id="traffic-volume-outliers">Traffic Volume Outliers</h2>
+<p>Below is the boxplot of traffic volume values. We want to see if the zero-values are reasonable or if these are distant outliers.</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>sns.boxplot(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> highway,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Traffic Volume on I-94"</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Hourly Number of Cars"</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-14-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The boxplot shows that 0 is within the approximate lower bound. It is not too distant from most of the datapoints to be considered an outlier.</p>
+<p>Let us view a histogram to understand the distribution better.</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> highway,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Traffic Volume on I-94"</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Hourly Number of Cars"</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This is an unusual distribution. There appear to be 3 peaks:</p>
+<ul>
+<li>less than 1000 cars</li>
+<li>around 3000 cars</li>
+<li>around 4500 cars</li>
+</ul>
+<p>It is common that less than 1000 cars pass through this I-94 station per hour. Therefore, it is likely that the 0-values are not outliers and do not need to be dropped from the dataset.</p>
+<p>Data cleaning is done, so here are the new descriptive statistics for the dataset.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>highway.describe(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    include <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    datetime_is_numeric <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">holiday</th>
+<th data-quarto-table-cell-role="th">temp</th>
+<th data-quarto-table-cell-role="th">rain_1h</th>
+<th data-quarto-table-cell-role="th">snow_1h</th>
+<th data-quarto-table-cell-role="th">clouds_all</th>
+<th data-quarto-table-cell-role="th">weather_main</th>
+<th data-quarto-table-cell-role="th">weather_description</th>
+<th data-quarto-table-cell-role="th">date_time</th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>40564</td>
+<td>40564.000000</td>
+<td>40564.000000</td>
+<td>40564.000000</td>
+<td>40564.000000</td>
+<td>40564</td>
+<td>40564</td>
+<td>40564</td>
+<td>40564.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">unique</td>
+<td>12</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>11</td>
+<td>35</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">top</td>
+<td>None</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>Clouds</td>
+<td>sky is clear</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>40511</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>15123</td>
+<td>11632</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>NaN</td>
+<td>281.385602</td>
+<td>0.076353</td>
+<td>0.000117</td>
+<td>44.209299</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2015-12-24 02:14:28.937974528</td>
+<td>3291.081402</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>NaN</td>
+<td>243.390000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2012-10-02 09:00:00</td>
+<td>0.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>NaN</td>
+<td>271.850000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2014-02-03 02:45:00</td>
+<td>1249.750000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>NaN</td>
+<td>282.867500</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>40.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2016-06-02 19:30:00</td>
+<td>3429.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>NaN</td>
+<td>292.280000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>90.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2017-08-03 02:15:00</td>
+<td>4952.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>NaN</td>
+<td>310.070000</td>
+<td>55.630000</td>
+<td>0.510000</td>
+<td>100.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2018-09-30 23:00:00</td>
+<td>7280.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>NaN</td>
+<td>13.092942</td>
+<td>0.769729</td>
+<td>0.005677</td>
+<td>38.682163</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1984.638849</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Due to data cleaning, the following have changed:</p>
+<ul>
+<li>Minimum <code>temp</code> is 243.39 Kelvin</li>
+<li>Maximum <code>rain_1h</code> is 55.63 mm</li>
+</ul>
+<p>These are more reasonable values than before.</p>
+</section>
+</section>
+<section id="exploratory-data-analysis" class="level1">
+<h1>Exploratory Data Analysis</h1>
+<section id="traffic-volume-day-vs.-night" class="level2">
+<h2 class="anchored" data-anchor-id="traffic-volume-day-vs.-night">Traffic Volume: Day vs.&nbsp;Night</h2>
+<p>At the end of the data cleaning, we noticed that there were 3 peaks (most common values) in the traffic volume data. It is possible that this can be explained by comparing traffic volume between daytime and nighttime.</p>
+<p>In order to do this, we can make a new column <code>half</code> which labels each entry as “day” or “night.” We will consider daytime to be from 6:00 AM to 6:00 PM, or 6:00 to 18:00.</p>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>highway[<span class="st">"half"</span>] <span class="op">=</span> (</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    highway[<span class="st">"date_time"</span>]</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .dt.hour.between(<span class="dv">6</span>, <span class="dv">17</span>) <span class="co"># Boolean Series where True represents day</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .replace({<span class="va">True</span>: <span class="st">"day"</span>, <span class="va">False</span>: <span class="st">"night"</span>}) <span class="co"># Replace booleans with strings</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>highway[<span class="st">"half"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>night    20418
+day      20146
+Name: half, dtype: int64</code></pre>
+</div>
+</div>
+<p>There are 20418 nighttime entries and 20146 daytime entries.</p>
+<p>Now we can compare the day and night histograms for traffic volume.</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> highway,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    hue <span class="op">=</span> <span class="st">"half"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    palette <span class="op">=</span> <span class="st">"RdBu"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Traffic Volume on I-94: Day and Night"</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Hourly Number of Cars"</span>)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-18-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The histogram above shows that:</p>
+<ul>
+<li>In the nighttime, the traffic volume is commonly under 1000 or around 3000.</li>
+<li>In the daytime, the traffic volume is commonly around 5000.</li>
+</ul>
+<p>Therefore, <strong>traffic is generally heavier in the daytime</strong>, between 6:00 AM and 6:00 PM.</p>
+<p>Since we want to determine what influences heavy traffic, it would be best to focus our analysis on the daytime entries. Thus, such entries will be put in a separate DataFrame called <code>daytime</code>.</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>daytime <span class="op">=</span> (</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    highway</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .loc[highway[<span class="st">"half"</span>] <span class="op">==</span> <span class="st">"day"</span>]</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    .drop(columns <span class="op">=</span> <span class="st">"half"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>daytime.describe(</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    include <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    datetime_is_numeric <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">holiday</th>
+<th data-quarto-table-cell-role="th">temp</th>
+<th data-quarto-table-cell-role="th">rain_1h</th>
+<th data-quarto-table-cell-role="th">snow_1h</th>
+<th data-quarto-table-cell-role="th">clouds_all</th>
+<th data-quarto-table-cell-role="th">weather_main</th>
+<th data-quarto-table-cell-role="th">weather_description</th>
+<th data-quarto-table-cell-role="th">date_time</th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>20146</td>
+<td>20146.000000</td>
+<td>20146.000000</td>
+<td>20146.000000</td>
+<td>20146.000000</td>
+<td>20146</td>
+<td>20146</td>
+<td>20146</td>
+<td>20146.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">unique</td>
+<td>1</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>10</td>
+<td>33</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">top</td>
+<td>None</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>Clouds</td>
+<td>sky is clear</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>20146</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>8360</td>
+<td>4971</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>NaN</td>
+<td>282.018771</td>
+<td>0.076210</td>
+<td>0.000124</td>
+<td>47.342500</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2015-12-26 11:32:49.582050816</td>
+<td>4784.630100</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>NaN</td>
+<td>243.390000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2012-10-02 09:00:00</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>NaN</td>
+<td>272.220000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2014-02-04 08:15:00</td>
+<td>4311.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>NaN</td>
+<td>283.640000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>40.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2016-06-07 11:30:00</td>
+<td>4943.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>NaN</td>
+<td>293.370000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>90.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2017-08-06 09:45:00</td>
+<td>5678.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>NaN</td>
+<td>310.070000</td>
+<td>44.450000</td>
+<td>0.510000</td>
+<td>100.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2018-09-30 17:00:00</td>
+<td>7280.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>NaN</td>
+<td>13.330019</td>
+<td>0.737429</td>
+<td>0.005673</td>
+<td>37.808456</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1293.502893</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>This DataFrame contains only 20146 rows. The descriptive statistics are naturally somewhat different from before.</p>
+</section>
+<section id="effect-of-units-of-time" class="level2">
+<h2 class="anchored" data-anchor-id="effect-of-units-of-time">Effect of Units of Time</h2>
+<p>It is possible that traffic volume is influenced by certain units of time. For example, it could be influenced by the month, the day of the week, or the hour of the day. In this section, we investigate these factors.</p>
+<section id="by-month" class="level3">
+<h3 class="anchored" data-anchor-id="by-month">By Month</h3>
+<p>First, does the month affect the traffic volume?</p>
+<p>Let us make a new column that indicates the month as a number.</p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"month"</span>] <span class="op">=</span> daytime[<span class="st">"date_time"</span>].dt.month</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"month"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>0        10
+1        10
+2        10
+3        10
+4        10
+         ..
+48191     9
+48192     9
+48194     9
+48196     9
+48197     9
+Name: month, Length: 20146, dtype: int64</code></pre>
+</div>
+</div>
+<p>Then, we can calculate and graph the average traffic volume per month. The median will be used instead of the mean since the data are not normally distributed.</p>
+<p>Table:</p>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>(daytime</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a> .groupby(<span class="st">"month"</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a> .median()</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a> [[<span class="st">"traffic_volume"</span>]]</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">month</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>4651.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>4886.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>5062.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5105.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>5052.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">6</td>
+<td>5050.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>4799.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>5056.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>4925.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">10</td>
+<td>5056.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">11</td>
+<td>4876.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">12</td>
+<td>4722.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Line chart:</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> daytime,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"month"</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Effect of Month on Traffic Volume"</span>)</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Month"</span>),</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Median Hourly Number of Cars"</span>)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-22-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The line chart shows that the median traffic volume is highest in April, possibly because this is in spring. Traffic volume is lowest in January and December since these are in the middle of winter. July also has less traffic since it is in the middle of summer.</p>
+</section>
+<section id="by-day-of-the-week" class="level3">
+<h3 class="anchored" data-anchor-id="by-day-of-the-week">By Day of the Week</h3>
+<p>Next, we will investigate the effect of the day of the week on the traffic volume.</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"day"</span>] <span class="op">=</span> daytime[<span class="st">"date_time"</span>].dt.dayofweek</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>(daytime</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a> .groupby(<span class="st">"day"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a> .median()</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a> [[<span class="st">"traffic_volume"</span>]]</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">day</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>4971.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>5268.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>5355.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>5404.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5399.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>4194.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>3737.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Note that 0 means Monday and 6 means Sunday.</p>
+<p>The corresponding line chart is shown below.</p>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> daytime,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"day"</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Effect of Day of Week on Traffic Volume"</span>)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Day of the Week"</span>),</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Median Hourly Number of Cars"</span>)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-24-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The line chart shows that the traffic volume is very high from Monday to Friday, then dips by 1000 cars on Saturday and Sunday. It makes sense that traffic is <strong>heavier on weekdays</strong> and lighter on weekends.</p>
+</section>
+<section id="by-hour-of-the-day" class="level3">
+<h3 class="anchored" data-anchor-id="by-hour-of-the-day">By Hour of the Day</h3>
+<p>Lastly, we will investigate the effect of the time of day on the traffic volume. Since we have narrowed the dataset down to daytime entries, only hours from 6:00 AM to 6:00 PM are included.</p>
+<p>First, though, let’s make a column that indicates weekdays and weekends so that we can compare them.</p>
+<div class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"day_type"</span>] <span class="op">=</span> daytime[<span class="st">"day"</span>].replace({</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>: <span class="st">"business day"</span>,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>: <span class="st">"business day"</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>: <span class="st">"business day"</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span>: <span class="st">"business day"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span>: <span class="st">"business day"</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">5</span>: <span class="st">"weekend"</span>,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">6</span>: <span class="st">"weekend"</span>,</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, below is the table of median traffic volume grouped by the day of the week and the type of day.</p>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"hour"</span>] <span class="op">=</span> daytime[<span class="st">"date_time"</span>].dt.hour</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>(daytime</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a> .groupby([<span class="st">"hour"</span>, <span class="st">"day_type"</span>])</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a> .median()</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a> [[<span class="st">"traffic_volume"</span>]]</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">hour</th>
+<th data-quarto-table-cell-role="th">day_type</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">6</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>5588.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>1092.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">7</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>6320.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>1547.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">8</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>5751.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>2268.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">9</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>5053.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>3147.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">10</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>4484.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>3722.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">11</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>4714.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>4114.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">12</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>4921.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>4442.5</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">13</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>4919.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>4457.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">14</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>5232.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>4457.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">15</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>5740.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>4421.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">16</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>6403.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>4438.0</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">17</td>
+<td data-quarto-table-cell-role="th">business day</td>
+<td>5987.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">weekend</td>
+<td>4261.5</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The hours are in 24-hour time; 17:00 represents the hour from 5:00 PM to 6:00 PM.</p>
+<p>In order to understand this table better, we can visualize it in the line chart below.</p>
+<div class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> daytime,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"hour"</span>,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    hue <span class="op">=</span> <span class="st">"day_type"</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Effect of Hour of Day on Traffic Volume"</span>)</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Hour of the Day"</span>),</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Median Hourly Number of Cars"</span>)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>plt.legend(title <span class="op">=</span> <span class="st">"Day Type"</span>)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-27-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>On business days, traffic is heaviest at 7:00 AM and 4:00 PM. These are the times when people travel to or from work. Traffic is lightest around noontime.</p>
+<p>On weekends, traffic volume increases from 6:00 AM to 12:00 PM and plateaus from there on. People are free to travel at any time on weekends since most don’t have work. However, the number of cars is still lower on weekends compared to business days.</p>
+</section>
+</section>
+<section id="effect-of-weather" class="level2">
+<h2 class="anchored" data-anchor-id="effect-of-weather">Effect of Weather</h2>
+<p>Up until now, we have investigated the possible effects of different units of time on the traffic volume. In this section, we focus on how traffic is affected by the <strong>weather</strong>.</p>
+<p>The following are the weather-related columns in the dataset:</p>
+<ul>
+<li><code>temp</code></li>
+<li><code>rain_1h</code></li>
+<li><code>snow_1h</code></li>
+<li><code>clouds_all</code></li>
+<li><code>weather_main</code></li>
+<li><code>weather_description</code></li>
+</ul>
+<p>The first 4 are numerical and the last 2 are categorical.</p>
+<section id="numerical-weather-columns" class="level3">
+<h3 class="anchored" data-anchor-id="numerical-weather-columns">Numerical Weather Columns</h3>
+<p>Let us inspect the Pearson’s correlation coefficient between traffic volume and each of the numerical weather columns.</p>
+<div class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>daytime.corr().loc[</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"temp"</span>, <span class="st">"rain_1h"</span>, <span class="st">"snow_1h"</span>, <span class="st">"clouds_all"</span>],</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"traffic_volume"</span>]</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">temp</td>
+<td>0.124311</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">rain_1h</td>
+<td>-0.022817</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">snow_1h</td>
+<td>-0.004145</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">clouds_all</td>
+<td>0.000621</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>All 4 numerical weather columns appear to have very weak correlations with traffic volume.</p>
+<p>The highest correlation involves temperature, but the coefficient is only 12.43. This indicates a weak positive relationship. As temperature increases, traffic volume also increases, but not consistently.</p>
+<p>We can understand the correlation better using a scatter plot.</p>
+<div class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> daytime,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"temp"</span>,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Effect of Temperature on Traffic Volume"</span>)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Temperature (Kelvin)"</span>),</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Median Hourly Number of Cars"</span>)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-29-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Unfortunately, the datapoints are scattered quite consistently throughout all combinations of temperature and traffic volume. The correlation is weak; temperature is not a reliable indicator of traffic. Neither are the other numerical weather columns, since their coefficients were even weaker.</p>
+</section>
+<section id="categorical-weather-columns" class="level3">
+<h3 class="anchored" data-anchor-id="categorical-weather-columns">Categorical Weather Columns</h3>
+<p>Next, we’ll see if the categorical weather columns can serve as better indicators of heavy traffic.</p>
+<section id="short-descriptions-of-weather" class="level4">
+<h4 class="anchored" data-anchor-id="short-descriptions-of-weather">Short Descriptions of Weather</h4>
+<p>The <code>weather_main</code> column contains short, 1-word descriptions of the weather.</p>
+<p>What are the categories under <code>weather_main</code>?</p>
+<div class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"weather_main"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="29">
+<pre><code>Clouds          8360
+Clear           5821
+Rain            2392
+Mist            1441
+Snow            1165
+Haze             472
+Drizzle          223
+Thunderstorm     175
+Fog               90
+Smoke              7
+Name: weather_main, dtype: int64</code></pre>
+</div>
+</div>
+<p>Clouds, Clear, and Rain are the most frequent descriptions of the weather.</p>
+<p>Next, let us investigate the effect of the weather description on the traffic volume. The table is shown below.</p>
+<div class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>(daytime</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a> .groupby(<span class="st">"weather_main"</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a> .median()</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a> [[<span class="st">"traffic_volume"</span>]]</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="30">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">weather_main</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Clear</td>
+<td>4936.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Clouds</td>
+<td>4974.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Drizzle</td>
+<td>5132.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Fog</td>
+<td>5588.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Haze</td>
+<td>4817.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Mist</td>
+<td>5053.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Rain</td>
+<td>4975.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Smoke</td>
+<td>4085.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Snow</td>
+<td>4570.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Thunderstorm</td>
+<td>4875.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>This is visualized in the bar plot below.</p>
+<div class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>sns.barplot(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> daytime,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"weather_main"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Effect of Short Weather Description on Traffic Volume"</span>)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Short Weather Description"</span>),</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Median Hourly Number of Cars"</span>)</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation <span class="op">=</span> <span class="dv">45</span>)</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-32-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The traffic volume appears to be mostly consistent across short weather descriptions. Notably:</p>
+<ul>
+<li>Traffic is heaviest during fog (5588 cars).</li>
+<li>Traffic is lightest when there is smoke (4085 cars).</li>
+</ul>
+<p>However, the effects are quite small, reaching only up to a difference of 1000 cars.</p>
+</section>
+<section id="long-descriptions-of-weather" class="level4">
+<h4 class="anchored" data-anchor-id="long-descriptions-of-weather">Long Descriptions of Weather</h4>
+<p>The <code>weather_description</code> column contains longer descriptions of the weather.</p>
+<p>Below are its categories.</p>
+<div class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"weather_description"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<pre><code>sky is clear                           4971
+broken clouds                          2683
+overcast clouds                        2526
+scattered clouds                       2068
+mist                                   1441
+light rain                             1415
+few clouds                             1083
+Sky is Clear                            850
+light snow                              811
+moderate rain                           666
+haze                                    472
+heavy snow                              249
+heavy intensity rain                    207
+light intensity drizzle                 160
+proximity thunderstorm                  136
+snow                                     90
+fog                                      90
+proximity shower rain                    89
+drizzle                                  57
+thunderstorm                             22
+light shower snow                        11
+light intensity shower rain               7
+smoke                                     7
+thunderstorm with light rain              7
+very heavy rain                           7
+heavy intensity drizzle                   6
+thunderstorm with heavy rain              5
+thunderstorm with rain                    3
+sleet                                     3
+light rain and snow                       1
+freezing rain                             1
+proximity thunderstorm with drizzle       1
+proximity thunderstorm with rain          1
+Name: weather_description, dtype: int64</code></pre>
+</div>
+</div>
+<p>Notice that there is a <code>sky is clear</code> value and a <code>Sky is Clear</code> value with different capitalization. It is likely that these two categories mean the same thing, so let us combine them.</p>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"weather_description"</span>].replace(</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"Sky is Clear"</span>: <span class="st">"sky is clear"</span>},</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    inplace <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>daytime[<span class="st">"weather_description"</span>].value_counts().head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="33">
+<pre><code>sky is clear        5821
+broken clouds       2683
+overcast clouds     2526
+scattered clouds    2068
+mist                1441
+Name: weather_description, dtype: int64</code></pre>
+</div>
+</div>
+<p>The <code>sky is clear</code> category now has 5821 entries.</p>
+<p>Now that that’s cleaned, let’s make a table showing the effect of the long weather description on the traffic volume.</p>
+<div class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>(daytime</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a> .groupby(<span class="st">"weather_description"</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a> .median()</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a> [[<span class="st">"traffic_volume"</span>]]</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="34">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">traffic_volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">weather_description</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">broken clouds</td>
+<td>4925.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">drizzle</td>
+<td>5132.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">few clouds</td>
+<td>4977.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">fog</td>
+<td>5588.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">freezing rain</td>
+<td>4762.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">haze</td>
+<td>4817.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">heavy intensity drizzle</td>
+<td>5824.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">heavy intensity rain</td>
+<td>4922.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">heavy snow</td>
+<td>4673.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">light intensity drizzle</td>
+<td>5086.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">light intensity shower rain</td>
+<td>4695.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">light rain</td>
+<td>5011.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">light rain and snow</td>
+<td>5544.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">light shower snow</td>
+<td>4324.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">light snow</td>
+<td>4601.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mist</td>
+<td>5053.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">moderate rain</td>
+<td>4940.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">overcast clouds</td>
+<td>4968.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">proximity shower rain</td>
+<td>4910.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">proximity thunderstorm</td>
+<td>4849.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">proximity thunderstorm with drizzle</td>
+<td>6667.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">proximity thunderstorm with rain</td>
+<td>5730.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">scattered clouds</td>
+<td>5032.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">sky is clear</td>
+<td>4936.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">sleet</td>
+<td>5174.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">smoke</td>
+<td>4085.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">snow</td>
+<td>4032.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">thunderstorm</td>
+<td>5578.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">thunderstorm with heavy rain</td>
+<td>5278.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">thunderstorm with light rain</td>
+<td>4073.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">thunderstorm with rain</td>
+<td>4270.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">very heavy rain</td>
+<td>4802.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The table is visualized in the bar graph below.</p>
+<div class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>sns.barplot(</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> daytime,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"weather_description"</span>,</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"traffic_volume"</span>,</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Effect of Long Weather Description on Traffic Volume"</span>)</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Long Weather Description"</span>),</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Median Hourly Number of Cars"</span>)</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation <span class="op">=</span> <span class="dv">45</span>, ha <span class="op">=</span> <span class="st">"right"</span>)</span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-25-Indicators-Heavy-Traffic-I-94-Highway_files/figure-html/cell-36-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Similar to the bar graph of short weather descriptions, most of the values are around 5000 cars. Notably:</p>
+<ul>
+<li>Traffic is heaviest in a proximity thunderstorm with drizzle (6667 cars).
+<ul>
+<li>The word “proximity” was likely used to emphasize that the storm was very close to the station.</li>
+<li>It makes sense that a drizzling thunderstorm directly over the highway would reduce visibility and make traffic pile up.</li>
+</ul></li>
+<li>Traffic is lightest in snow (4032 cars).
+<ul>
+<li>It is likely that more people choose not to travel outside when it is snowing.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>This project aimed to determine reliable indicators of heavy traffic along the I-94 highway. Data were narrowed down to daytime (as opposed to nighttime) entries, which have higher traffic volumes. Exploratory data analysis was conducted using mostly Seaborn visualizations.</p>
+<p>The following conclusions were drawn:</p>
+<ul>
+<li>Time has various effects on traffic volume. Traffic is <strong>heavier</strong> when:
+<ul>
+<li>It is daytime (between 6:00 AM and 6:00 PM).</li>
+<li>The month is from March to June.</li>
+<li>The day is a business day, as opposed to a weekend.</li>
+<li>The hour is 7:00 AM or 4:00 PM on a business day.</li>
+</ul></li>
+</ul>
+<p><br></p>
+<ul>
+<li>Weather affects traffic volume to a lesser extent. Traffic is <strong>heavier</strong> when:
+<ul>
+<li>There is fog on the road (or other visual obstructions).</li>
+<li>There is a nearby thunderstorm with drizzle or rain.</li>
+</ul></li>
+</ul>
+<p><br></p>
+<p>Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,29 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/2022-07-10-My-Portfolio-Projects.html",
+      "/posts/2022-07-05-My-Learning-Journey-Data-Science.html",
+      "/posts/2022-07-10-Guide-Start-Learning-Data-Science.html",
+      "/posts/2022-07-05-College-Applications-Dashboard.html",
+      "/posts/2022-05-10-Student-Mapping-Project.html",
+      "/posts/2022-04-16-Online-Course-Dataquest-Data-Scientist-Python.html",
+      "/posts/2022-01-21-neural-network-classify-handwritten-digits.html",
+      "/posts/2022-01-16-comparison-regression-models-predicting-bike-rentals.html",
+      "/posts/2021-12-28-linear-regression-house-prices.html",
+      "/posts/2021-12-21-predicting-car-prices-k-nearest-neighbors.html",
+      "/posts/2021-12-17-agriHanda-Agricultural-Disaster-Risk-Web-App.html",
+      "/posts/2021-12-14-naive-bayes-algorithm-detecting-spam-messages.html",
+      "/posts/2021-11-18-basic-statistics-fandango-ratings.html",
+      "/posts/2021-07-31-answering-business-questions-online-music-store-sql.html",
+      "/posts/2021-07-24-using-sql-query-analyze-cia-factbook-database.html",
+      "/posts/2021-06-13-how-student-demographic-affects-sat-performance-nyc.html",
+      "/posts/2021-06-01-employee-exit-survey-data-cleaning-aggregation.html",
+      "/posts/2021-05-28-making-explanatory-chart-usd-php-exchange-rates.html",
+      "/posts/2021-05-25-indicators-heavy-traffic-i-94-highway.html",
+      "/posts/2021-05-20-basic-data-cleaning-ebay-car-sales-data.html",
+      "/posts/2021-05-11-optimizing-hacker-news-posts.html",
+      "/posts/2021-05-08-profitable-app-profiles.html"
+    ]
+  }
+]

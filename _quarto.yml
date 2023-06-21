@@ -1,0 +1,23 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Migs Germar's Data Science Blog"
+  favicon: posts/images/favicon.ico
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/MiguelAHG
+      - icon: linkedin
+        href: https://www.linkedin.com/in/migs-germar/
+      - icon: facebook
+        href: https://www.facebook.com/miguelantonio.germar
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+
+
+

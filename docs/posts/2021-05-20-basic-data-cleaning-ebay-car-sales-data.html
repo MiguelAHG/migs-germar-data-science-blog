@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Migs Germar">
+<meta name="dcterms.date" content="2021-05-20">
+<meta name="description" content="I clean a messy dataset of eBay car sales data before performing simple analyses about car prices.">
+
+<title>Migs Germar’s Data Science Blog - Basic Data Cleaning with eBay Car Sales Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../posts/images/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Migs Germar’s Data Science Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MiguelAHG" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/migs-germar/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.facebook.com/miguelantonio.germar" rel="" target=""><i class="bi bi-facebook" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Basic Data Cleaning with eBay Car Sales Data</h1>
+                  <div>
+        <div class="description">
+          I clean a messy dataset of eBay car sales data before performing simple analyses about car prices.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">matplotlib</div>
+                <div class="quarto-category">seaborn</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Migs Germar </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 20, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#package-installs" id="toc-package-installs" class="nav-link" data-scroll-target="#package-installs">Package Installs</a></li>
+  <li><a href="#data-overview" id="toc-data-overview" class="nav-link" data-scroll-target="#data-overview">Data Overview</a></li>
+  <li><a href="#data-cleaning" id="toc-data-cleaning" class="nav-link" data-scroll-target="#data-cleaning">Data Cleaning</a>
+  <ul class="collapse">
+  <li><a href="#column-labels" id="toc-column-labels" class="nav-link" data-scroll-target="#column-labels">Column Labels</a></li>
+  <li><a href="#uninformative-columns" id="toc-uninformative-columns" class="nav-link" data-scroll-target="#uninformative-columns">Uninformative Columns</a></li>
+  <li><a href="#outliers-in-numerical-columns" id="toc-outliers-in-numerical-columns" class="nav-link" data-scroll-target="#outliers-in-numerical-columns">Outliers in Numerical Columns</a>
+  <ul class="collapse">
+  <li><a href="#price-in-euros" id="toc-price-in-euros" class="nav-link" data-scroll-target="#price-in-euros">Price in Euros</a></li>
+  <li><a href="#metric-horsepower" id="toc-metric-horsepower" class="nav-link" data-scroll-target="#metric-horsepower">Metric Horsepower</a></li>
+  <li><a href="#year-of-registration" id="toc-year-of-registration" class="nav-link" data-scroll-target="#year-of-registration">Year of Registration</a></li>
+  <li><a href="#months-of-registration" id="toc-months-of-registration" class="nav-link" data-scroll-target="#months-of-registration">Months of Registration</a></li>
+  </ul></li>
+  <li><a href="#missing-values" id="toc-missing-values" class="nav-link" data-scroll-target="#missing-values">Missing Values</a></li>
+  </ul></li>
+  <li><a href="#data-transformation" id="toc-data-transformation" class="nav-link" data-scroll-target="#data-transformation">Data Transformation</a>
+  <ul class="collapse">
+  <li><a href="#strings-to-datetime-objects" id="toc-strings-to-datetime-objects" class="nav-link" data-scroll-target="#strings-to-datetime-objects">Strings to Datetime Objects</a></li>
+  </ul></li>
+  <li><a href="#data-analysis" id="toc-data-analysis" class="nav-link" data-scroll-target="#data-analysis">Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#most-expensive-car-brands" id="toc-most-expensive-car-brands" class="nav-link" data-scroll-target="#most-expensive-car-brands">Most Expensive Car Brands</a></li>
+  <li><a href="#used-car-prices-by-age" id="toc-used-car-prices-by-age" class="nav-link" data-scroll-target="#used-car-prices-by-age">Used Car Prices by Age</a></li>
+  <li><a href="#used-car-prices-by-mileage" id="toc-used-car-prices-by-mileage" class="nav-link" data-scroll-target="#used-car-prices-by-mileage">Used Car Prices by Mileage</a></li>
+  <li><a href="#effect-of-presence-of-damage-on-used-car-price" id="toc-effect-of-presence-of-damage-on-used-car-price" class="nav-link" data-scroll-target="#effect-of-presence-of-damage-on-used-car-price">Effect of Presence of Damage on Used Car Price</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/2021-05-20-used-cars.jpg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<center>
+<a href="https://unsplash.com/photos/pdUVFX8WglY">Unsplash | Parker Gibbs</a>
+</center>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>In 2016, Kaggle user <code>orgezleka</code> scraped data about used car advertisements on eBay Kleinanzeigen, which is the eBay Classifieds website of Germany. The full dataset is still available on <a href="https://data.world/data-society/used-cars-data">Used Cars Data (data.world 2016)</a>, with over 370,000 datapoints.</p>
+<p>The project aims to answer the following questions:</p>
+<ul>
+<li>Which brands of the used cars are most expensive?</li>
+<li>Does a used car’s age affect its price?</li>
+<li>Does a used car’s mileage affect its price?</li>
+<li>Does the presence of unrepaired damage affect a car’s price?</li>
+</ul>
+<p>More importantly, this project aims to showcase basic data cleaning procedures. Thus, even columns beyond the scope of the research questions will be considered for cleaning. The assumption is that analysis will eventually be performed on all columns.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I wrote this notebook for the <a href="https://www.dataquest.io/">Dataquest</a> course’s <a href="https://app.dataquest.io/m/294/guided-project%3A-exploring-ebay-car-sales-data/9/next-steps">Guided Project: Exploring eBay Car Sales Data</a>. The general project flow came from Dataquest. However, all of the text and code here are written by me unless stated otherwise.</p>
+</div>
+</div>
+</section>
+<section id="package-installs" class="level1">
+<h1>Package Installs</h1>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="data-overview" class="level1">
+<h1>Data Overview</h1>
+<p>Below is the information about each column in the dataset, taken from <a href="https://data.world/data-society/used-cars-data">Used Cars Data (data.world 2016)</a>.</p>
+<ul>
+<li>dateCrawled : when this ad was first crawled, all field-values are taken from this date</li>
+<li>name : “name” of the car</li>
+<li>seller : private or dealer</li>
+<li>offerType</li>
+<li>price : the price on the ad to sell the car</li>
+<li>abtest</li>
+<li>vehicleType</li>
+<li>yearOfRegistration : at which year the car was first registered</li>
+<li>gearbox</li>
+<li>powerPS : power of the car in PS</li>
+<li>model</li>
+<li>kilometer : how many kilometers the car has driven</li>
+<li>monthOfRegistration : at which month the car was first registered</li>
+<li>fuelType</li>
+<li>brand</li>
+<li>notRepairedDamage : if the car has a damage which is not repaired yet</li>
+<li>dateCreated : the date for which the ad at ebay was created</li>
+<li>nrOfPictures : number of pictures in the ad</li>
+<li>postalCode</li>
+<li>lastSeenOnline : when the crawler saw this ad last online</li>
+</ul>
+<p>Let us view the first 5 rows of the dataset below.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>autos <span class="op">=</span> pd.read_csv(<span class="st">"./private/2021-05-20-BDC-Files/autos.csv"</span>, encoding <span class="op">=</span> <span class="st">"Windows-1252"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>autos.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">dateCrawled</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">seller</th>
+<th data-quarto-table-cell-role="th">offerType</th>
+<th data-quarto-table-cell-role="th">price</th>
+<th data-quarto-table-cell-role="th">abtest</th>
+<th data-quarto-table-cell-role="th">vehicleType</th>
+<th data-quarto-table-cell-role="th">yearOfRegistration</th>
+<th data-quarto-table-cell-role="th">gearbox</th>
+<th data-quarto-table-cell-role="th">powerPS</th>
+<th data-quarto-table-cell-role="th">model</th>
+<th data-quarto-table-cell-role="th">kilometer</th>
+<th data-quarto-table-cell-role="th">monthOfRegistration</th>
+<th data-quarto-table-cell-role="th">fuelType</th>
+<th data-quarto-table-cell-role="th">brand</th>
+<th data-quarto-table-cell-role="th">notRepairedDamage</th>
+<th data-quarto-table-cell-role="th">dateCreated</th>
+<th data-quarto-table-cell-role="th">nrOfPictures</th>
+<th data-quarto-table-cell-role="th">postalCode</th>
+<th data-quarto-table-cell-role="th">lastSeen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2016-03-24 11:52:17</td>
+<td>Golf_3_1.6</td>
+<td>privat</td>
+<td>Angebot</td>
+<td>480</td>
+<td>test</td>
+<td>NaN</td>
+<td>1993</td>
+<td>manuell</td>
+<td>0</td>
+<td>golf</td>
+<td>150000</td>
+<td>0</td>
+<td>benzin</td>
+<td>volkswagen</td>
+<td>NaN</td>
+<td>2016-03-24 00:00:00</td>
+<td>0</td>
+<td>70435</td>
+<td>2016-04-07 03:16:57</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2016-03-24 10:58:45</td>
+<td>A5_Sportback_2.7_Tdi</td>
+<td>privat</td>
+<td>Angebot</td>
+<td>18300</td>
+<td>test</td>
+<td>coupe</td>
+<td>2011</td>
+<td>manuell</td>
+<td>190</td>
+<td>NaN</td>
+<td>125000</td>
+<td>5</td>
+<td>diesel</td>
+<td>audi</td>
+<td>ja</td>
+<td>2016-03-24 00:00:00</td>
+<td>0</td>
+<td>66954</td>
+<td>2016-04-07 01:46:50</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2016-03-14 12:52:21</td>
+<td>Jeep_Grand_Cherokee_"Overland"</td>
+<td>privat</td>
+<td>Angebot</td>
+<td>9800</td>
+<td>test</td>
+<td>suv</td>
+<td>2004</td>
+<td>automatik</td>
+<td>163</td>
+<td>grand</td>
+<td>125000</td>
+<td>8</td>
+<td>diesel</td>
+<td>jeep</td>
+<td>NaN</td>
+<td>2016-03-14 00:00:00</td>
+<td>0</td>
+<td>90480</td>
+<td>2016-04-05 12:47:46</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2016-03-17 16:54:04</td>
+<td>GOLF_4_1_4__3TÜRER</td>
+<td>privat</td>
+<td>Angebot</td>
+<td>1500</td>
+<td>test</td>
+<td>kleinwagen</td>
+<td>2001</td>
+<td>manuell</td>
+<td>75</td>
+<td>golf</td>
+<td>150000</td>
+<td>6</td>
+<td>benzin</td>
+<td>volkswagen</td>
+<td>nein</td>
+<td>2016-03-17 00:00:00</td>
+<td>0</td>
+<td>91074</td>
+<td>2016-03-17 17:40:17</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2016-03-31 17:25:20</td>
+<td>Skoda_Fabia_1.4_TDI_PD_Classic</td>
+<td>privat</td>
+<td>Angebot</td>
+<td>3600</td>
+<td>test</td>
+<td>kleinwagen</td>
+<td>2008</td>
+<td>manuell</td>
+<td>69</td>
+<td>fabia</td>
+<td>90000</td>
+<td>7</td>
+<td>diesel</td>
+<td>skoda</td>
+<td>nein</td>
+<td>2016-03-31 00:00:00</td>
+<td>0</td>
+<td>60437</td>
+<td>2016-04-06 10:17:21</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>We can get additional information about each column using <code>DataFrame.info()</code>.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>autos.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 371528 entries, 0 to 371527
+Data columns (total 20 columns):
+ #   Column               Non-Null Count   Dtype 
+---  ------               --------------   ----- 
+ 0   dateCrawled          371528 non-null  object
+ 1   name                 371528 non-null  object
+ 2   seller               371528 non-null  object
+ 3   offerType            371528 non-null  object
+ 4   price                371528 non-null  int64 
+ 5   abtest               371528 non-null  object
+ 6   vehicleType          333659 non-null  object
+ 7   yearOfRegistration   371528 non-null  int64 
+ 8   gearbox              351319 non-null  object
+ 9   powerPS              371528 non-null  int64 
+ 10  model                351044 non-null  object
+ 11  kilometer            371528 non-null  int64 
+ 12  monthOfRegistration  371528 non-null  int64 
+ 13  fuelType             338142 non-null  object
+ 14  brand                371528 non-null  object
+ 15  notRepairedDamage    299468 non-null  object
+ 16  dateCreated          371528 non-null  object
+ 17  nrOfPictures         371528 non-null  int64 
+ 18  postalCode           371528 non-null  int64 
+ 19  lastSeen             371528 non-null  object
+dtypes: int64(7), object(13)
+memory usage: 56.7+ MB</code></pre>
+</div>
+</div>
+<p>The dataset has 371,528 rows and 20 columns. Each column contains one of two types of data:</p>
+<ul>
+<li><code>int64</code>: 64-bit integers</li>
+<li><code>object</code>: text strings</li>
+</ul>
+<p>Also, some columns have a non-null count smaller than the number of entries. This means that there are missing values in these columns. The column <code>notRepairedDamage</code>has the most missing values.</p>
+</section>
+<section id="data-cleaning" class="level1">
+<h1>Data Cleaning</h1>
+<section id="column-labels" class="level2">
+<h2 class="anchored" data-anchor-id="column-labels">Column Labels</h2>
+<p>As seen earlier, all of the column labels are written in camel case. This means that the first letter of each word is capitalized, like <code>CamelCase.</code></p>
+<p>Column labels should ideally be written in <code>snake_case</code> so that these are easier to use. Thus, I will convert all column labels to snake case.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> <span class="bu">list</span>(autos.columns)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>new_cols <span class="op">=</span> []</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label <span class="kw">in</span> cols:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># List of indices of the first letter of each word.</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    cap_inds <span class="op">=</span> [<span class="dv">0</span>] <span class="op">+</span> [index <span class="cf">for</span> index, character <span class="kw">in</span> <span class="bu">enumerate</span>(label) <span class="cf">if</span> character.isupper()]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># List of 2-tuples. Each tuple contains the start index of the current word</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># and the start index of the next word.</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    zipped <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(cap_inds, cap_inds[<span class="dv">1</span>:] <span class="op">+</span> [<span class="va">None</span>]))</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Split the label into a list of words.</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Make them lowercase and combine them with underscores.</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    word_list <span class="op">=</span> [label[i:j] <span class="cf">for</span> i, j <span class="kw">in</span> zipped]</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    word_list <span class="op">=</span> [word.lower() <span class="cf">for</span> word <span class="kw">in</span> word_list]</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    new_label <span class="op">=</span> <span class="st">"_"</span>.join(word_list)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    new_cols.append(new_label)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>autos.columns <span class="op">=</span> new_cols</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>autos.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 371528 entries, 0 to 371527
+Data columns (total 20 columns):
+ #   Column                 Non-Null Count   Dtype 
+---  ------                 --------------   ----- 
+ 0   date_crawled           371528 non-null  object
+ 1   name                   371528 non-null  object
+ 2   seller                 371528 non-null  object
+ 3   offer_type             371528 non-null  object
+ 4   price                  371528 non-null  int64 
+ 5   abtest                 371528 non-null  object
+ 6   vehicle_type           333659 non-null  object
+ 7   year_of_registration   371528 non-null  int64 
+ 8   gearbox                351319 non-null  object
+ 9   power_p_s              371528 non-null  int64 
+ 10  model                  351044 non-null  object
+ 11  kilometer              371528 non-null  int64 
+ 12  month_of_registration  371528 non-null  int64 
+ 13  fuel_type              338142 non-null  object
+ 14  brand                  371528 non-null  object
+ 15  not_repaired_damage    299468 non-null  object
+ 16  date_created           371528 non-null  object
+ 17  nr_of_pictures         371528 non-null  int64 
+ 18  postal_code            371528 non-null  int64 
+ 19  last_seen              371528 non-null  object
+dtypes: int64(7), object(13)
+memory usage: 56.7+ MB</code></pre>
+</div>
+</div>
+<p>Now, all of the column labels are in snake case. However, I will manually change a few of them to make them neater.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>convert <span class="op">=</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"power_p_s"</span>: <span class="st">"power_ps"</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nr_of_pictures"</span>: <span class="st">"num_pictures"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"year_of_registration"</span>: <span class="st">"year_reg"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kilometer"</span>: <span class="st">"mileage_km"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"month_of_registration"</span>: <span class="st">"month_reg"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"not_repaired_damage"</span>: <span class="st">"damage"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>autos.columns <span class="op">=</span> pd.Series(autos.columns).replace(convert)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>autos.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 371528 entries, 0 to 371527
+Data columns (total 20 columns):
+ #   Column        Non-Null Count   Dtype 
+---  ------        --------------   ----- 
+ 0   date_crawled  371528 non-null  object
+ 1   name          371528 non-null  object
+ 2   seller        371528 non-null  object
+ 3   offer_type    371528 non-null  object
+ 4   price         371528 non-null  int64 
+ 5   abtest        371528 non-null  object
+ 6   vehicle_type  333659 non-null  object
+ 7   year_reg      371528 non-null  int64 
+ 8   gearbox       351319 non-null  object
+ 9   power_ps      371528 non-null  int64 
+ 10  model         351044 non-null  object
+ 11  mileage_km    371528 non-null  int64 
+ 12  month_reg     371528 non-null  int64 
+ 13  fuel_type     338142 non-null  object
+ 14  brand         371528 non-null  object
+ 15  damage        299468 non-null  object
+ 16  date_created  371528 non-null  object
+ 17  num_pictures  371528 non-null  int64 
+ 18  postal_code   371528 non-null  int64 
+ 19  last_seen     371528 non-null  object
+dtypes: int64(7), object(13)
+memory usage: 56.7+ MB</code></pre>
+</div>
+</div>
+<p>All of the column labels are now easy to use.</p>
+</section>
+<section id="uninformative-columns" class="level2">
+<h2 class="anchored" data-anchor-id="uninformative-columns">Uninformative Columns</h2>
+<p>Next, we will look for columns filled with mostly 1 value. The other values in them are underrepresented, so we wouldn’t be able to compare groups reliably.</p>
+<p>We can inspect the columns using <code>DataFrame.describe()</code>.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>autos.describe(include <span class="op">=</span> <span class="st">"all"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Include all columns, including text.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date_crawled</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">seller</th>
+<th data-quarto-table-cell-role="th">offer_type</th>
+<th data-quarto-table-cell-role="th">price</th>
+<th data-quarto-table-cell-role="th">abtest</th>
+<th data-quarto-table-cell-role="th">vehicle_type</th>
+<th data-quarto-table-cell-role="th">year_reg</th>
+<th data-quarto-table-cell-role="th">gearbox</th>
+<th data-quarto-table-cell-role="th">power_ps</th>
+<th data-quarto-table-cell-role="th">model</th>
+<th data-quarto-table-cell-role="th">mileage_km</th>
+<th data-quarto-table-cell-role="th">month_reg</th>
+<th data-quarto-table-cell-role="th">fuel_type</th>
+<th data-quarto-table-cell-role="th">brand</th>
+<th data-quarto-table-cell-role="th">damage</th>
+<th data-quarto-table-cell-role="th">date_created</th>
+<th data-quarto-table-cell-role="th">num_pictures</th>
+<th data-quarto-table-cell-role="th">postal_code</th>
+<th data-quarto-table-cell-role="th">last_seen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>371528</td>
+<td>371528</td>
+<td>371528</td>
+<td>371528</td>
+<td>3.715280e+05</td>
+<td>371528</td>
+<td>333659</td>
+<td>371528.000000</td>
+<td>351319</td>
+<td>371528.000000</td>
+<td>351044</td>
+<td>371528.000000</td>
+<td>371528.000000</td>
+<td>338142</td>
+<td>371528</td>
+<td>299468</td>
+<td>371528</td>
+<td>371528.0</td>
+<td>371528.00000</td>
+<td>371528</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">unique</td>
+<td>280500</td>
+<td>233531</td>
+<td>2</td>
+<td>2</td>
+<td>NaN</td>
+<td>2</td>
+<td>8</td>
+<td>NaN</td>
+<td>2</td>
+<td>NaN</td>
+<td>251</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>7</td>
+<td>40</td>
+<td>2</td>
+<td>114</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>182806</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">top</td>
+<td>2016-03-24 14:49:47</td>
+<td>Ford_Fiesta</td>
+<td>privat</td>
+<td>Angebot</td>
+<td>NaN</td>
+<td>test</td>
+<td>limousine</td>
+<td>NaN</td>
+<td>manuell</td>
+<td>NaN</td>
+<td>golf</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>benzin</td>
+<td>volkswagen</td>
+<td>nein</td>
+<td>2016-04-03 00:00:00</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2016-04-07 06:45:59</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>7</td>
+<td>657</td>
+<td>371525</td>
+<td>371516</td>
+<td>NaN</td>
+<td>192585</td>
+<td>95894</td>
+<td>NaN</td>
+<td>274214</td>
+<td>NaN</td>
+<td>30070</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>223857</td>
+<td>79640</td>
+<td>263182</td>
+<td>14450</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>17</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1.729514e+04</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2004.577997</td>
+<td>NaN</td>
+<td>115.549477</td>
+<td>NaN</td>
+<td>125618.688228</td>
+<td>5.734445</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.0</td>
+<td>50820.66764</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">std</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>3.587954e+06</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>92.866598</td>
+<td>NaN</td>
+<td>192.139578</td>
+<td>NaN</td>
+<td>40112.337051</td>
+<td>3.712412</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.0</td>
+<td>25799.08247</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">min</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.000000e+00</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1000.000000</td>
+<td>NaN</td>
+<td>0.000000</td>
+<td>NaN</td>
+<td>5000.000000</td>
+<td>0.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.0</td>
+<td>1067.00000</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1.150000e+03</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1999.000000</td>
+<td>NaN</td>
+<td>70.000000</td>
+<td>NaN</td>
+<td>125000.000000</td>
+<td>3.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.0</td>
+<td>30459.00000</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2.950000e+03</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2003.000000</td>
+<td>NaN</td>
+<td>105.000000</td>
+<td>NaN</td>
+<td>150000.000000</td>
+<td>6.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.0</td>
+<td>49610.00000</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>7.200000e+03</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2008.000000</td>
+<td>NaN</td>
+<td>150.000000</td>
+<td>NaN</td>
+<td>150000.000000</td>
+<td>9.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.0</td>
+<td>71546.00000</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">max</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2.147484e+09</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>9999.000000</td>
+<td>NaN</td>
+<td>20000.000000</td>
+<td>NaN</td>
+<td>150000.000000</td>
+<td>12.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0.0</td>
+<td>99998.00000</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The <code>top</code> row gives the most frequent value in the column. The <code>freq</code> row tells exactly how often the <code>top</code> value occurs.</p>
+<p>We can see that in the <code>seller</code> column, <code>"privat"</code> appears 371,525 times; this is close to the total number of entries. Also, in the <code>offer_type</code> column, <code>"Angebot"</code> appears 371,516 times.</p>
+<p>Let us first check the unique values of the <code>seller</code> column.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"seller"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>privat        371525
+gewerblich         3
+Name: seller, dtype: int64</code></pre>
+</div>
+</div>
+<p>In English, these mean “private” and “commercial.” It is likely that private listings are put up by individuals, whereas commercial listings are put up by used car dealer companies. Most listings scraped were apparently private.</p>
+<p>One idea is to compare private listing prices to commercial listing prices. However, there are only 3 commercial listings, so this comparison would be unreliable. Therefore, we can drop this column.</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>autos.drop(columns <span class="op">=</span> <span class="st">"seller"</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Secondly, let’s check the unique values of the <code>offer_type</code> column.</p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"offer_type"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>Angebot    371516
+Gesuch         12
+Name: offer_type, dtype: int64</code></pre>
+</div>
+</div>
+<p>In English, these mean “offer” and “request.” This isn’t very informative. It could have something to do with the system of sending Offers to buyers in eBay. In any case, it doesn’t seem interesting to analyze, and there are only 12 request listings. Thus, we can also drop this column.</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>autos.drop(columns <span class="op">=</span> <span class="st">"offer_type"</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, the numerical <code>num_pictures</code> column has a minimum of 0 and a maximum of 0.</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"num_pictures"</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>count    371528.0
+mean          0.0
+std           0.0
+min           0.0
+25%           0.0
+50%           0.0
+75%           0.0
+max           0.0
+Name: num_pictures, dtype: float64</code></pre>
+</div>
+</div>
+<p>This means that none of the listings for used cars were found to have pictures. This data may be true or it may have come from an error, but either way, it is not useful. Thus, it will be dropped.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>autos.drop(columns <span class="op">=</span> <span class="st">"num_pictures"</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="outliers-in-numerical-columns" class="level2">
+<h2 class="anchored" data-anchor-id="outliers-in-numerical-columns">Outliers in Numerical Columns</h2>
+<p>Next, we inspect the ranges of numerical columns to see if there are any unusually high or low values.</p>
+<div class="cell" data-scrolled="true" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>autos.describe(include <span class="op">=</span> np.number)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">price</th>
+<th data-quarto-table-cell-role="th">year_reg</th>
+<th data-quarto-table-cell-role="th">power_ps</th>
+<th data-quarto-table-cell-role="th">mileage_km</th>
+<th data-quarto-table-cell-role="th">month_reg</th>
+<th data-quarto-table-cell-role="th">postal_code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>3.715280e+05</td>
+<td>371528.000000</td>
+<td>371528.000000</td>
+<td>371528.000000</td>
+<td>371528.000000</td>
+<td>371528.00000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>1.729514e+04</td>
+<td>2004.577997</td>
+<td>115.549477</td>
+<td>125618.688228</td>
+<td>5.734445</td>
+<td>50820.66764</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>3.587954e+06</td>
+<td>92.866598</td>
+<td>192.139578</td>
+<td>40112.337051</td>
+<td>3.712412</td>
+<td>25799.08247</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>0.000000e+00</td>
+<td>1000.000000</td>
+<td>0.000000</td>
+<td>5000.000000</td>
+<td>0.000000</td>
+<td>1067.00000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>1.150000e+03</td>
+<td>1999.000000</td>
+<td>70.000000</td>
+<td>125000.000000</td>
+<td>3.000000</td>
+<td>30459.00000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>2.950000e+03</td>
+<td>2003.000000</td>
+<td>105.000000</td>
+<td>150000.000000</td>
+<td>6.000000</td>
+<td>49610.00000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>7.200000e+03</td>
+<td>2008.000000</td>
+<td>150.000000</td>
+<td>150000.000000</td>
+<td>9.000000</td>
+<td>71546.00000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>2.147484e+09</td>
+<td>9999.000000</td>
+<td>20000.000000</td>
+<td>150000.000000</td>
+<td>12.000000</td>
+<td>99998.00000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The following unusual characteristics are noticeable:</p>
+<ul>
+<li><code>price</code>: The minimum price is 0 (free) and the maximum price is larger than 2 billion.</li>
+<li><code>year_reg</code>: The earliest year of registration is 1000, and the latest year is 9999.</li>
+<li><code>power_ps</code>: The lowest power is 0 PS. The highest is 20,000 PS, which is much higher than the 75th percentile (only 150 PS).</li>
+<li><code>month_reg</code>: The month numbers range from 0 to 12, not 1 to 12.</li>
+</ul>
+<p>All of these columns shall be cleaned of inaccurate data.</p>
+<section id="price-in-euros" class="level3">
+<h3 class="anchored" data-anchor-id="price-in-euros">Price in Euros</h3>
+<p>It was seen that the minimum value for price data was 0, and the maximum is over 2,000,000,000. Since this data was scraped from the German eBay, we can assume that these prices are in euros.</p>
+<p>Both the minimum and maximum values seem to be very unrealistic for the price of a used car, so we want to clean this data.</p>
+<p>Let us create a frequency table of the prices. We will first sort it by price, ascending.</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"price"</span>].value_counts().sort_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>0             10778
+1              1189
+2                12
+3                 8
+4                 1
+              ...  
+32545461          1
+74185296          1
+99000000          1
+99999999         15
+2147483647        1
+Name: price, Length: 5597, dtype: int64</code></pre>
+</div>
+</div>
+<p>Two things are noticeable:</p>
+<ul>
+<li>There are over 10,000 instances of 0 euro prices.</li>
+<li>There are several extremely high outliers, not just the one above 2 billion.</li>
+</ul>
+<p>Since it is unlikely that the cars are actually free, 0 may represent missing values. As for the high outliers, these may have resulted from inaccurate scraping.</p>
+<p>The next question is, what is the most frequent price value? Is it 0?</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"price"</span>].value_counts().sort_values(ascending <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre><code>0        10778
+500       5670
+1500      5394
+1000      4649
+1200      4594
+         ...  
+2610         1
+20620        1
+16689        1
+9964         1
+10985        1
+Name: price, Length: 5597, dtype: int64</code></pre>
+</div>
+</div>
+<p>Indeed, the most frequent price is 0, which makes it likely that it represents missing values. The next most frequent prices are 500, 1500, and 1000, most likely because these are easy for buyers to remember.</p>
+<p>Now that we know about the low and high outliers, we can clean rows using the interquartile range or IQR. The IQR is bounded by the 25th and 75th percentiles. Reasonable lower and upper bounds can be approximated by multiplying the IQR length by 1.5 and:</p>
+<ul>
+<li>subtracting it from the 25th percentile</li>
+<li>adding it to the 75th percentile</li>
+</ul>
+<p><em>Reference: <a href="https://www.askpython.com/python/examples/detection-removal-outliers-in-python">Detection and Removal of Outliers in Python – An Easy to Understand Guide</a></em></p>
+<p>Below, I use this method to find a lower and upper bound, and I drop rows outside of them.</p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>autos_desc <span class="op">=</span> autos[<span class="st">"price"</span>].describe()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>q25, q75 <span class="op">=</span> autos_desc[[<span class="st">"25%"</span>, <span class="st">"75%"</span>]]</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>iqr <span class="op">=</span> q75 <span class="op">-</span> q25</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>lower_bound <span class="op">=</span> q25 <span class="op">-</span> <span class="fl">1.5</span> <span class="op">*</span> iqr</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>upper_bound <span class="op">=</span> q75 <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> iqr</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>autos <span class="op">=</span> autos.loc[autos[<span class="st">"price"</span>].between(lower_bound, upper_bound)]</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Lower bound:"</span>, lower_bound)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Upper bound:"</span>, upper_bound)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"New shape:"</span>, autos.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Lower bound: -7925.0
+Upper bound: 16275.0
+New shape: (343420, 17)</code></pre>
+</div>
+</div>
+<p>Now, there are 343,420 rows remaining in the dataset. This is still quite large; not too many datapoints were removed.</p>
+<p>Let us view the new distribution of prices in a histogram.</p>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.histplot(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"price"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Used Car Prices, Cleaned Using IQR"</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-18-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Unfortunately, since the lower bound was negative, unrealistically low prices close to 0 were still accepted within the range.</p>
+<p>Remember from earlier that the 2nd most frequent price value was found to be 500 euros. This makes it likely that these were correct prices, rather than incorrectly scraped values. Thus, let us keep all price values greater than or equal to 500.</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>autos <span class="op">=</span> autos.loc[autos[<span class="st">"price"</span>] <span class="op">&gt;=</span> <span class="dv">500</span>]</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>autos.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre><code>(307358, 17)</code></pre>
+</div>
+</div>
+<p>Now, 307,358 datapoints remain. Let us look at the final distribution of prices:</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.histplot(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"price"</span>,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Used Car Prices, Cleaned of Low Values"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The distribution is still right-skewed, but at least the price range in the dataset is more reasonable now.</p>
+</section>
+<section id="metric-horsepower" class="level3">
+<h3 class="anchored" data-anchor-id="metric-horsepower">Metric Horsepower</h3>
+<p>We saw earlier that some power values were at 0 PS, and others were as high as 20,000 PS.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A measure of 1 PS (metric horsepower) is equivalent to 0.98 HP (horsepower). (<a href="https://www.autodeal.com.ph/articles/car-news-philippines/ps-vs-hp-understanding-spec-sheet">Deriquito 2020</a>)</p>
+</div>
+</div>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"power_ps"</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<pre><code>count    307358.000000
+mean        112.551842
+std         191.557378
+min           0.000000
+25%          75.000000
+50%         105.000000
+75%         143.000000
+max       20000.000000
+Name: power_ps, dtype: float64</code></pre>
+</div>
+</div>
+<p>Above are the new descriptive statistics for metric horsepower, after the transformations that we have done recently.</p>
+<p>According to <a href="https://www.autolist.com/guides/average-car-horsepower">“What is the Average Car Horsepower?” (2021)</a>, cars usually have a horsepower of 100 HP to 400 HP, though some have less. Faster cars have 400 HP to 1,000 HP, and some supercars have over 1,000 HP. The equivalent values in PS would be slightly higher.</p>
+<p>Considering that these are used cars, it is unlikely for them to be very fast much less to be supercars. Thus, we will keep cars with metric horsepowers between 50 and 450, in order to take as many of the realistic values as possible.</p>
+<div class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>autos <span class="op">=</span> autos.loc[autos[<span class="st">"power_ps"</span>].between(<span class="dv">50</span>, <span class="dv">450</span>)]</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"power_ps"</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<pre><code>count    274514.000000
+mean        121.166931
+std          50.535320
+min          50.000000
+25%          82.000000
+50%         114.000000
+75%         150.000000
+max         450.000000
+Name: power_ps, dtype: float64</code></pre>
+</div>
+</div>
+<p>Let us view the distribution of power values in a histogram.</p>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.histplot(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"power_ps"</span>,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Metric Horsepower (PS) of Used Cars"</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-23-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Like the price data, the power data are right-skewed. Lower values are more frequent. Still, we managed to capture most (274,514) of the datapoints using this range.</p>
+</section>
+<section id="year-of-registration" class="level3">
+<h3 class="anchored" data-anchor-id="year-of-registration">Year of Registration</h3>
+<p>Earlier, we noticed that the years of registration ranged from 1000 to 9999.</p>
+<div class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"year_reg"</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>count    274514.000000
+mean       2003.658039
+std          29.529992
+min        1000.000000
+25%        1999.000000
+50%        2004.000000
+75%        2007.000000
+max        9999.000000
+Name: year_reg, dtype: float64</code></pre>
+</div>
+</div>
+<p>Logically, the years of registration should only range from when automobiles were first mass-produced, in the 1800s or 1900s (<a href="https://www.britannica.com/technology/automobile/History-of-the-automobile">Encyclopedia Britannica</a>), to the year when the ads were last seen by the web crawler.</p>
+<p>We can know when the ads were last seen using the <code>last_seen</code> column of the dataset. The dates are shown as strings with years first, so we can sort them in descending order to find the most recent date.</p>
+<div class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"last_seen"</span>].sort_values(ascending <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<pre><code>343211    2016-04-07 14:58:51
+5069      2016-04-07 14:58:50
+72231     2016-04-07 14:58:50
+62402     2016-04-07 14:58:50
+122068    2016-04-07 14:58:50
+                 ...         
+244077    2016-03-05 14:35:28
+177326    2016-03-05 14:25:59
+136842    2016-03-05 14:15:39
+275196    2016-03-05 14:15:16
+311225    2016-03-05 14:15:08
+Name: last_seen, Length: 274514, dtype: object</code></pre>
+</div>
+</div>
+<p>It looks like all of the ads were last seen in 2016, so the cars could not have been registered beyond that year.</p>
+<p>Therefore, a reasonable range of years would be from 1900 to 2016. Let us keep all rows within this range.</p>
+<div class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>autos <span class="op">=</span> autos.loc[autos[<span class="st">"year_reg"</span>].between(<span class="dv">1900</span>, <span class="dv">2016</span>)]</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"year_reg"</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<pre><code>count    264977.000000
+mean       2002.977877
+std           6.097207
+min        1910.000000
+25%        1999.000000
+50%        2003.000000
+75%        2007.000000
+max        2016.000000
+Name: year_reg, dtype: float64</code></pre>
+</div>
+</div>
+<p>Now, the years of registration range from 1910 to 2016. There are also 264,977 datapoints remaining.</p>
+</section>
+<section id="months-of-registration" class="level3">
+<h3 class="anchored" data-anchor-id="months-of-registration">Months of Registration</h3>
+<p>Lastly, we noticed that the months of registration included integers from 0 to 12, not 1 to 12. Let us make a discrete histogram in order to understand the distribution.</p>
+<div class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.histplot(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"month_reg"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    discrete <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Used Cars' Months of Registration"</span>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>)</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-27-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The graph above shows that 0 is the least frequent value, appearing under 15,000 times. It seems very likely that it is a placeholder for unknown months. Therefore, we can remove rows with month 0.</p>
+<div class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>autos <span class="op">=</span> autos.loc[autos[<span class="st">"month_reg"</span>] <span class="op">&gt;=</span> <span class="dv">1</span>]</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"month_reg"</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="30">
+<pre><code>count    251198.000000
+mean          6.396237
+std           3.346424
+min           1.000000
+25%           4.000000
+50%           6.000000
+75%           9.000000
+max          12.000000
+Name: month_reg, dtype: float64</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="missing-values" class="level2">
+<h2 class="anchored" data-anchor-id="missing-values">Missing Values</h2>
+<p>Now, we shall deal with the null values in the dataset. First, how many null values are there per column?</p>
+<div class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>autos.isnull().<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="31">
+<pre><code>date_crawled        0
+name                0
+price               0
+abtest              0
+vehicle_type     5871
+year_reg            0
+gearbox          3103
+power_ps            0
+model            7422
+mileage_km          0
+month_reg           0
+fuel_type        9057
+brand               0
+damage          28718
+date_created        0
+postal_code         0
+last_seen           0
+dtype: int64</code></pre>
+</div>
+</div>
+<p>There are thousands of missing values for the vehicle type, gearbox, model, fuel type, and presence of damage. None of these can be easily determined from other columns.</p>
+<p>If we were to remove all rows with these missing values, we would be left with:</p>
+<div class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>autos.dropna().shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<pre><code>(208538, 17)</code></pre>
+</div>
+</div>
+<p>We would have 208,538 rows left. This is just over half of the original number of datapoints we started with, 371,528.</p>
+<p>This project is meant to showcase data cleaning, and we are assuming that all of the columns in the dataset will be used for analysis. Thus, we will have to delete all rows with missing values.</p>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>autos.dropna(inplace <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Below are the final descriptive statistics for the dataset after all of the cleaning.</p>
+<div class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>autos.describe(include <span class="op">=</span> <span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="34">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date_crawled</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">price</th>
+<th data-quarto-table-cell-role="th">abtest</th>
+<th data-quarto-table-cell-role="th">vehicle_type</th>
+<th data-quarto-table-cell-role="th">year_reg</th>
+<th data-quarto-table-cell-role="th">gearbox</th>
+<th data-quarto-table-cell-role="th">power_ps</th>
+<th data-quarto-table-cell-role="th">model</th>
+<th data-quarto-table-cell-role="th">mileage_km</th>
+<th data-quarto-table-cell-role="th">month_reg</th>
+<th data-quarto-table-cell-role="th">fuel_type</th>
+<th data-quarto-table-cell-role="th">brand</th>
+<th data-quarto-table-cell-role="th">damage</th>
+<th data-quarto-table-cell-role="th">date_created</th>
+<th data-quarto-table-cell-role="th">postal_code</th>
+<th data-quarto-table-cell-role="th">last_seen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>208538</td>
+<td>208538</td>
+<td>208538.000000</td>
+<td>208538</td>
+<td>208538</td>
+<td>208538.000000</td>
+<td>208538</td>
+<td>208538.000000</td>
+<td>208538</td>
+<td>208538.000000</td>
+<td>208538.000000</td>
+<td>208538</td>
+<td>208538</td>
+<td>208538</td>
+<td>208538</td>
+<td>208538.000000</td>
+<td>208538</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">unique</td>
+<td>177458</td>
+<td>114617</td>
+<td>NaN</td>
+<td>2</td>
+<td>8</td>
+<td>NaN</td>
+<td>2</td>
+<td>NaN</td>
+<td>248</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>7</td>
+<td>39</td>
+<td>2</td>
+<td>98</td>
+<td>NaN</td>
+<td>116677</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">top</td>
+<td>2016-04-02 22:54:55</td>
+<td>BMW_318i</td>
+<td>NaN</td>
+<td>test</td>
+<td>limousine</td>
+<td>NaN</td>
+<td>manuell</td>
+<td>NaN</td>
+<td>golf</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>benzin</td>
+<td>volkswagen</td>
+<td>nein</td>
+<td>2016-04-03 00:00:00</td>
+<td>NaN</td>
+<td>2016-04-07 09:45:41</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">freq</td>
+<td>5</td>
+<td>616</td>
+<td>NaN</td>
+<td>108258</td>
+<td>62894</td>
+<td>NaN</td>
+<td>166213</td>
+<td>NaN</td>
+<td>17505</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>136145</td>
+<td>44157</td>
+<td>189720</td>
+<td>8271</td>
+<td>NaN</td>
+<td>14</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>4984.662522</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2003.205953</td>
+<td>NaN</td>
+<td>122.635031</td>
+<td>NaN</td>
+<td>128250.990227</td>
+<td>6.381225</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>51907.756020</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">std</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>3990.028529</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>5.696916</td>
+<td>NaN</td>
+<td>50.515054</td>
+<td>NaN</td>
+<td>35781.848172</td>
+<td>3.350349</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>25766.228717</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">min</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>500.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1937.000000</td>
+<td>NaN</td>
+<td>50.000000</td>
+<td>NaN</td>
+<td>5000.000000</td>
+<td>1.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1067.000000</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1749.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2000.000000</td>
+<td>NaN</td>
+<td>85.000000</td>
+<td>NaN</td>
+<td>125000.000000</td>
+<td>3.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>31319.000000</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>3750.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2004.000000</td>
+<td>NaN</td>
+<td>116.000000</td>
+<td>NaN</td>
+<td>150000.000000</td>
+<td>6.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>51371.000000</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>7300.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2007.000000</td>
+<td>NaN</td>
+<td>150.000000</td>
+<td>NaN</td>
+<td>150000.000000</td>
+<td>9.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>72649.000000</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">max</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>16270.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2016.000000</td>
+<td>NaN</td>
+<td>450.000000</td>
+<td>NaN</td>
+<td>150000.000000</td>
+<td>12.000000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>99998.000000</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="data-transformation" class="level1">
+<h1>Data Transformation</h1>
+<section id="strings-to-datetime-objects" class="level2">
+<h2 class="anchored" data-anchor-id="strings-to-datetime-objects">Strings to Datetime Objects</h2>
+<p>As we saw earlier, the <code>date_crawled</code>, <code>date_created</code>, and <code>last_seen</code> columns contain dates and times in string format. It would be better to store these as datetime objects so that each part (year, month, etc.) can be accessed in analysis.</p>
+<p>For this section, I used <a href="https://www.geeksforgeeks.org/convert-the-column-type-from-string-to-datetime-format-in-pandas-dataframe/">“Convert the column type from string to datetime format in Pandas dataframe” (2020)</a> as a reference.</p>
+<p>First, though, we have to make a format string so that the numbers can be parsed properly.</p>
+<div class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>autos[[<span class="st">"date_crawled"</span>, <span class="st">"date_created"</span>, <span class="st">"last_seen"</span>]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="35">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date_crawled</th>
+<th data-quarto-table-cell-role="th">date_created</th>
+<th data-quarto-table-cell-role="th">last_seen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2016-03-17 16:54:04</td>
+<td>2016-03-17 00:00:00</td>
+<td>2016-03-17 17:40:17</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2016-03-31 17:25:20</td>
+<td>2016-03-31 00:00:00</td>
+<td>2016-04-06 10:17:21</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>2016-04-04 17:36:23</td>
+<td>2016-04-04 00:00:00</td>
+<td>2016-04-06 19:17:07</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">6</td>
+<td>2016-04-01 20:48:51</td>
+<td>2016-04-01 00:00:00</td>
+<td>2016-04-05 18:18:39</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>2016-03-26 19:54:18</td>
+<td>2016-03-26 00:00:00</td>
+<td>2016-04-06 10:45:34</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>All 3 columns seem to follow the same format:</p>
+<p>{4 digit year}-{2 digit month}-{2 digit day} {24-hour time hour}:{minute}:{second}</p>
+<p>The equivalent format string is below.</p>
+<div class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>format_str <span class="op">=</span> <span class="st">"%Y-%m-</span><span class="sc">%d</span><span class="st"> %H:%M:%S"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can use this string to parse the dates. This can be done quickly by using the <code>pd.to_datetime()</code> vectorized function, instead of using a for-loop with the <code>datetime</code> module.</p>
+<div class="cell" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"date_crawled"</span>] <span class="op">=</span> pd.to_datetime(</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    autos[<span class="st">"date_crawled"</span>],</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">format</span> <span class="op">=</span> format_str,</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"date_crawled"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="37">
+<pre><code>3        2016-03-17 16:54:04
+4        2016-03-31 17:25:20
+5        2016-04-04 17:36:23
+6        2016-04-01 20:48:51
+10       2016-03-26 19:54:18
+                 ...        
+371516   2016-04-04 09:57:12
+371517   2016-03-28 13:48:07
+371520   2016-03-19 19:53:49
+371524   2016-03-05 19:56:21
+371525   2016-03-19 18:57:12
+Name: date_crawled, Length: 208538, dtype: datetime64[ns]</code></pre>
+</div>
+</div>
+<p>We can see that the values look similar to how they looked before, but the dtype is now <code>datetime64[ns]</code>.</p>
+<p>For example, we can now access the month and day from the datetime objects.</p>
+<div class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"date_crawled"</span>].iloc[<span class="dv">0</span>].month</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="38">
+<pre><code>3</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"date_crawled"</span>].iloc[<span class="dv">0</span>].day</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="39">
+<pre><code>17</code></pre>
+</div>
+</div>
+<p>We can see that the date in the first row has a month of 3 (March) and a day of 17.</p>
+<p>Let us do the same for the other 2 date columns.</p>
+<div class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"date_created"</span>] <span class="op">=</span> pd.to_datetime(</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    autos[<span class="st">"date_created"</span>],</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">format</span> <span class="op">=</span> format_str,</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>autos[<span class="st">"last_seen"</span>] <span class="op">=</span> pd.to_datetime(</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>    autos[<span class="st">"last_seen"</span>],</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">format</span> <span class="op">=</span> format_str,</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>autos[[<span class="st">"date_crawled"</span>, <span class="st">"date_created"</span>, <span class="st">"last_seen"</span>]].describe(</span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>    datetime_is_numeric <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="40">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date_crawled</th>
+<th data-quarto-table-cell-role="th">date_created</th>
+<th data-quarto-table-cell-role="th">last_seen</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>208538</td>
+<td>208538</td>
+<td>208538</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>2016-03-21 13:39:21.839721984</td>
+<td>2016-03-20 19:44:12.604321536</td>
+<td>2016-03-30 09:43:36.598633984</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">min</td>
+<td>2016-03-05 14:06:23</td>
+<td>2015-08-07 00:00:00</td>
+<td>2016-03-05 14:15:16</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>2016-03-13 11:06:28</td>
+<td>2016-03-13 00:00:00</td>
+<td>2016-03-23 20:52:41.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>2016-03-21 18:46:44.500000</td>
+<td>2016-03-21 00:00:00</td>
+<td>2016-04-04 14:39:49.500000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>2016-03-29 15:36:22.500000</td>
+<td>2016-03-29 00:00:00</td>
+<td>2016-04-06 11:45:07</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">max</td>
+<td>2016-04-07 14:36:58</td>
+<td>2016-04-07 00:00:00</td>
+<td>2016-04-07 14:58:51</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>We can see that since the 3 columns are in datetime format, they are now treated as numerical values. They have a mean and a list of percentiles.</p>
+<p>Data transformation is done, so we can move on to data analysis.</p>
+</section>
+</section>
+<section id="data-analysis" class="level1">
+<h1>Data Analysis</h1>
+<p>Statistical analyses with hypothesis testing are outside of the scope of this project, since it is centered on data cleaning. Thus, I will perform some simple aggregates and visualize them in graphs.</p>
+<section id="most-expensive-car-brands" class="level2">
+<h2 class="anchored" data-anchor-id="most-expensive-car-brands">Most Expensive Car Brands</h2>
+<p>Below, a bar graph shows each car brand and the median price. The mean is not used because we know that the price data are right-skewed, not normal.</p>
+<div class="cell" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.barplot(</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"brand"</span>,</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"price"</span>,</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Median Prices of Used Cars by Brand"</span>)</span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation <span class="op">=</span> <span class="dv">90</span>)</span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-39-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The graph shows that Porsche has the highest median price of used cars, at almost 12,000 euros. This is followed by Mini, Land Rover, and Jeep.</p>
+</section>
+<section id="used-car-prices-by-age" class="level2">
+<h2 class="anchored" data-anchor-id="used-car-prices-by-age">Used Car Prices by Age</h2>
+<p>The line plot below shows the relationship between a car’s year of registration (later -&gt; newer) and the median price.</p>
+<div class="cell" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.lineplot(</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"year_reg"</span>,</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"price"</span>,</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Median Prices of Used Cars by Year of Registration"</span>)</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation <span class="op">=</span> <span class="dv">90</span>)</span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-40-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The line plot shows that used car prices are lowest when the year of registration is in the mid-1990s.</p>
+<p>To the right of the minimum, as the year of registration gets later, the median price steadily becomes higher. This makes sense because newer cars would have a higher value, even if they’re used.</p>
+<p>On the other hand, to the left of the minimum, the median price increases (albeit erratically) as the year of registration gets earlier. This suggests that very old cars are considered to be valuable because they are rare. It is likely that the avid car collectors are the ones who pay such high prices for these cars.</p>
+</section>
+<section id="used-car-prices-by-mileage" class="level2">
+<h2 class="anchored" data-anchor-id="used-car-prices-by-mileage">Used Car Prices by Mileage</h2>
+<p>The line plot below shows the relationship between used cars’ mileage in kilometers and the median price.</p>
+<div class="cell" data-execution_count="43">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.lineplot(</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"mileage_km"</span>,</span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"price"</span>,</span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Median Prices of Used Cars by Mileage in Kilometers"</span>)</span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation <span class="op">=</span> <span class="dv">90</span>)</span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-41-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>As expected, price decreases as mileage increases. What is unexpected is that there is a sharp increase in price from around 500 km to 1000 km. This was likely caused by an outlier datapoint which had a low mileage and a low price.</p>
+</section>
+<section id="effect-of-presence-of-damage-on-used-car-price" class="level2">
+<h2 class="anchored" data-anchor-id="effect-of-presence-of-damage-on-used-car-price">Effect of Presence of Damage on Used Car Price</h2>
+<p>Lastly, we will analyze the effect of the presence of unrepaired damage on the median price of used cars.</p>
+<div class="cell" data-execution_count="44">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.barplot(</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> autos,</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"damage"</span>,</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"price"</span>,</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>    estimator <span class="op">=</span> np.median,</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>    ci <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Effect of Presence of Damage on Median Used Car Price"</span>)</span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation <span class="op">=</span> <span class="dv">90</span>)</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-20-Basic-Data-Cleaning-eBay-Car-Sales-Data_files/figure-html/cell-42-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>It can be seen that the median price of used cars without damage is 4000 euros. The median price is 1500 euros for those with unrepaired damage.</p>
+<p>Therefore, cars with damage generally have lower prices. This makes sense because if the buyer plans to drive the car, they must shoulder the expense of repairing it.</p>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>In this project, we did cleaning, transformation, and simple analyses on data about used cars. Below are the insights we gained with regards to each research question. Note that prices were aggregated using the median, not the mean.</p>
+<ul>
+<li><strong>Which brands of the used cars are most expensive?</strong></li>
+</ul>
+<p>The top 4 most expensive brands of used cars are Porsche, Mini, Land Rover, and Jeep (descending order).</p>
+<p><br></p>
+<ul>
+<li><strong>Does a used car’s age affect its price?</strong></li>
+</ul>
+<p>Yes. Cars registered in the mid-1990s have the lowest prices, with a median of 1000 euros.</p>
+<p>As cars get newer from that point, their median price increases. As cars get older from the same point, their median price also increases. Very old cars are rare and therefore valuable to collectors.</p>
+<p><br></p>
+<ul>
+<li><strong>Does a used car’s mileage affect its price?</strong></li>
+</ul>
+<p>Yes, as mileage increases, price decreases.</p>
+<p><br></p>
+<ul>
+<li><strong>Does the presence of unrepaired damage affect a car’s price?</strong></li>
+</ul>
+<p>Yes, the median price of damaged used cars is much lower than that of cars without damage.</p>
+<p><br></p>
+<hr>
+<p>Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

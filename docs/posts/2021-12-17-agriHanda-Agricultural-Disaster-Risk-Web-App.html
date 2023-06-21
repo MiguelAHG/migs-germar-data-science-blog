@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Migs Germar">
+<meta name="dcterms.date" content="2021-12-17">
+<meta name="description" content="I developed a web app that won two awards in the Project SPARTA PH Open Data Challenge for Butuan City.">
+
+<title>Migs Germar’s Data Science Blog - agriHanda: an Agricultural Disaster Risk Web App</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../posts/images/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Migs Germar’s Data Science Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MiguelAHG" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/migs-germar/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.facebook.com/miguelantonio.germar" rel="" target=""><i class="bi bi-facebook" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">agriHanda: an Agricultural Disaster Risk Web App</h1>
+                  <div>
+        <div class="description">
+          I developed a web app that won two awards in the Project SPARTA PH Open Data Challenge for Butuan City.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">competition</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">altair</div>
+                <div class="quarto-category">streamlit</div>
+                <div class="quarto-category">git</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Migs Germar </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 17, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-web-app" id="toc-the-web-app" class="nav-link active" data-scroll-target="#the-web-app">The Web App</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
+  <li><a href="#data-science-skills" id="toc-data-science-skills" class="nav-link" data-scroll-target="#data-science-skills">Data Science Skills</a>
+  <ul class="collapse">
+  <li><a href="#pandas-multiindex" id="toc-pandas-multiindex" class="nav-link" data-scroll-target="#pandas-multiindex">pandas MultiIndex</a></li>
+  <li><a href="#streamlit-web-app-framework" id="toc-streamlit-web-app-framework" class="nav-link" data-scroll-target="#streamlit-web-app-framework">Streamlit web app framework</a></li>
+  <li><a href="#altair-package-for-data-visualization" id="toc-altair-package-for-data-visualization" class="nav-link" data-scroll-target="#altair-package-for-data-visualization">Altair package for data visualization</a></li>
+  <li><a href="#git-and-github-workflow" id="toc-git-and-github-workflow" class="nav-link" data-scroll-target="#git-and-github-workflow">Git and GitHub workflow</a></li>
+  <li><a href="#writing-a-readme-and-documentation" id="toc-writing-a-readme-and-documentation" class="nav-link" data-scroll-target="#writing-a-readme-and-documentation">Writing a README and Documentation</a></li>
+  </ul></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">Bibliography</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/agriHanda/agriHanda-choropleth-map.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<center>
+<i>The ‘Map of Butuan City’ feature of agriHanda.</i>
+</center>
+<p><br></p>
+<p>In June 2021, I read that there was an upcoming local competition in data science and analytics. This was the Project SPARTA Open Data Challenge, which was organized by the Development Academy of the Philippines (DAP) and DOST-PCIEERD. The <a href="https://sparta.dap.edu.ph/opendata/">Sparta Portal</a> provided open data about Butuan City, which is the “commercial, industrial and administrative center” of the Caraga region (“Butuan City”, n.d.). Participants could then use this data to create cleaned datasets, datablogs, data journalism pieces, research papers, dashboards, predictive models, software applications, or visual storytelling pieces (“Approach to innovations”, n.d.).</p>
+<p>Thus, I formed a team with three of my schoolmates (Fiona Jao, Lorenzo Layug, and Yuri Dolorfino) and we entered the competition as the “Datos Puti” team. We cleaned open data about agricultural disaster risk together, then I programmed agriHanda, an app which would visualize this data.</p>
+<p>In the end, we were awarded as “Second Placer” and “Best in Ingenious Solution.” I was proud of this because this was the first data science competition that I had ever joined. Furthermore, despite being a senior high school student at the time, I was able to perform well against the other eleven competing teams, most of whom were from the college and professional levels.</p>
+<p>To see our certificates, use this link: <a href="https://drive.google.com/drive/folders/1lPbGrsfzzlP8vMLa0EeajrQo3sFz2iAj?usp=sharing">Certificates Folder</a></p>
+<p>To read the DAP’s article about the competition and recognition ceremony, use this link: <a href="https://sparta.dap.edu.ph/sgp/news/winners-of-first-ever-hackathon-and-open-data-challenge-recognized-6489">Winners of First-ever Hackathon and Open Data Challenge Recognized</a></p>
+<p>In this post, I will talk about the web app, its strengths and points for improvement, and the data science skills that I honed along the way.</p>
+<section id="the-web-app" class="level1">
+<h1>The Web App</h1>
+<p>First, I will give a brief introduction to agriHanda. The “agri” part of the name refers to agriculture, whereas the “Handa” part is a Tagalog or Bisaya word for “prepared.” Thus, the title encapsulates the goal of the app to help the LGU prepare for natural hazards which may pose a threat to the city’s agriculture industry.</p>
+<p>Specifically, the app is a dashboard since it focuses on creating helpful visualizations. It uses data about the vulnerability of Butuan City’s crops, fisheries, and livestock viz-a-viz natural hazards such as drought, flooding, rain-induced landslide, sea level rise, and storm surge.</p>
+<p>The app has three main features. The “Map of Butuan City” feature shows a choropleth map. This means that the user can select a variable about agricultural disaster risk, and the colors of the barangays change based on the value of this variable. For example, it can show which general areas have a high vulnerability score of crops against flooding. The “Barangay Data Summary” feature presents tables and histograms that summarize the disaster risk scores of a chosen barangay. Lastly, the “Graphing Tool” feature allows the user to create a custom chart using one or two disaster risk variables.</p>
+<p>For more information, you can watch our short four-minute pitch presentation about the app.: <a href="https://drive.google.com/file/d/1kw_uvdJFk2qKJkXCKcmcROv1q_6AaRE9/view?usp=sharing">agriHanda Video Pitch presentation</a></p>
+<p>To try out the app yourself, visit this link: <a href="https://bit.ly/agriHanda">bit.ly/agriHanda</a></p>
+<p>For more technical details about the project, visit the documentation through this link: <a href="https://docs.google.com/document/d/e/2PACX-1vSGwaN4kZBjq2OMpkQbZPbE2GUdN6fKcGs-8ctL69KQy2CcT6hINcx91RHKince0DJPDs11_HkzLpiT/pub">agriHanda - Agricultural Disaster Risk App</a></p>
+</section>
+<section id="reflection" class="level1">
+<h1>Reflection</h1>
+<p>Now that the competition is over, it is necessary for me to reflect on agriHanda so that I can do even better next time.</p>
+<p>First, I’d like to discuss the strengths of the project. One was that we <strong>thoroughly cleaned and combined the data</strong> so that it could be used in our web app and other software. Furthermore, because the variables were arranged in a hierarchy, new data can be added based on it. For example, the dataset only contains agriculture data as of now, but it could be expanded to other sectors such as infrastructure and population. It could also be expanded to include more natural hazards, such as volcanic eruption and earthquakes.</p>
+<p>The main strength of the project, though, was that it had a <strong>variety of visualizations</strong>, which offered different perspectives on the data. For example, the choropleth map feature is useful for determining general areas or groups of adjacent barangays that share certain characteristics, such as high vulnerability or high adaptive capacity. The Barangay Data Summary is useful for focusing on a single barangay and determining which hazards pose the greatest threat against it. The Graphing Tool is versatile because it has various types of charts, so it can be used to answer specific questions about relationships between variables.</p>
+<p>However, it would be difficult to use the choropleth map and the Graphing Tool if I did not provide the <strong>Help page for the variable selection system</strong>. This page explained the hierarchy of variables in the dataset and provided practice for how to use the variable selection system. Thus, even if this system was unusual, the app still managed to be user-friendly.</p>
+<p>Lastly, the project also had <strong>detailed documentation</strong>. Apart from explaining how the web app works, it also gives instructions for how researchers can use the cleaned dataset in their own Python scripts. It also has a guide on how to start developing the web app locally, so that the LGU can revise the app instead of having me do it.</p>
+<p>Despite all of these positive aspects, however, I know that there was still room for improvement. The most glaring issue with the project is that it <strong>has a wide breadth but lacks depth</strong>. The web app provides many options regarding variables and graphs. However, I did not investigate a <strong>specific problem or research question</strong>. Thus, I did not make any interpretations of the graphs, and instead left this task to the app users. I did not perform any <strong>statistical tests or machine learning models</strong>, which could have then led to concrete suggestions for how the city could prepare its agriculture against disasters. That would have had a much more direct and positive impact on Butuan City.</p>
+<p>I must keep these things in mind the next time that I join a similar competition. Rather than a simple dashboard, I think I should try to form a research paper or a predictive model, since these have more potential to create change in a community.</p>
+</section>
+<section id="data-science-skills" class="level1">
+<h1>Data Science Skills</h1>
+<p>In this last part, I will discuss some of the data science skills that I honed in this project.</p>
+<section id="pandas-multiindex" class="level2">
+<h2 class="anchored" data-anchor-id="pandas-multiindex">pandas MultiIndex</h2>
+<p>Recall that during the data cleaning phase, I had to organize the variables into a hierarchy. Thus, I had to learn how to use the pandas MultiIndex.</p>
+<p>For context, pandas is a Python package for manipulating tables of data, which are called DataFrames. A regular Index object is used to store the row labels or column labels of a DataFrame. In my case, each of the original data files included columns such as “Exposure”, “Sensitivity”, etc. Each row represented a unique barangay. Each file only gave data about a specific element and hazard (for example, fisheries and storm surge).</p>
+<p>Below is a simplified example of what one file would look like.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Barangay</th>
+<th>Adaptive Capacity Score</th>
+<th>Vulnerability Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>2</td>
+<td>1.2</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>5</td>
+<td>0.8</td>
+</tr>
+</tbody>
+</table>
+<p>When I combined the files, I used MultiIndex to create a hierarchy which looked like this:</p>
+<table class="table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 15%">
+<col style="width: 12%">
+<col style="width: 15%">
+<col style="width: 12%">
+<col style="width: 3%">
+<col style="width: 15%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Sector</th>
+<th>Agriculture</th>
+<th></th>
+<th></th>
+<th></th>
+<th>…</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Element</td>
+<td>Crops</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Fisheries</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Hazard</td>
+<td>Drought</td>
+<td></td>
+<td>Flood</td>
+<td></td>
+<td></td>
+<td>Drought</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Disaster Risk Aspect</td>
+<td>Adaptive Capacity</td>
+<td>Overall Risk</td>
+<td>Adaptive Capacity</td>
+<td>Overall Risk</td>
+<td></td>
+<td>Adaptive Capacity</td>
+<td>Overall Risk</td>
+</tr>
+<tr class="even">
+<td>Detail</td>
+<td>Adaptive Capacity Score</td>
+<td>Vulnerability Score</td>
+<td>Adaptive Capacity Score</td>
+<td>Vulnerability Score</td>
+<td></td>
+<td>Adaptive Capacity Score</td>
+<td>Vulnerability Score</td>
+</tr>
+<tr class="odd">
+<td>Barangay</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>A</td>
+<td>2</td>
+<td>1.2</td>
+<td>5</td>
+<td>1</td>
+<td></td>
+<td>4</td>
+<td>1.5</td>
+</tr>
+<tr class="odd">
+<td>B</td>
+<td>5</td>
+<td>0.8</td>
+<td>4</td>
+<td>1.1</td>
+<td></td>
+<td>1</td>
+<td>0.6</td>
+</tr>
+</tbody>
+</table>
+<p>The first 5 rows of the table above are part of the hierarchy of labels. The levels are Sector, Element, Hazard, Disaster Risk Aspect, and Detail. With this hierarchy, the variables can be navigated easily even if there are many of them.</p>
+<p>For more information on MultiIndex, visit the <a href="https://pandas.pydata.org/docs/user_guide/advanced.html">pandas documentation</a>.</p>
+</section>
+<section id="streamlit-web-app-framework" class="level2">
+<h2 class="anchored" data-anchor-id="streamlit-web-app-framework">Streamlit web app framework</h2>
+<p>Another thing that I practiced in this project was the Streamlit package. This provides a framework for building simple web apps in Python. One would first write a script which uses the Streamlit API to represent text, widgets, charts, and other visual elements.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> streamlit <span class="im">as</span> st</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># App title</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>st.title(<span class="st">'My App'</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Let the user select a variable from a drop-down list.</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>input_var <span class="op">=</span> st.selectbox(</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Select a variable'</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    options <span class="op">=</span> [<span class="st">'Exposure'</span>, <span class="st">'Sensitivity'</span>, <span class="st">'Adaptive Capacity'</span>, <span class="st">'Vulnerability'</span>, <span class="st">'Risk'</span>],</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a chart using this variable.</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># chart = ...</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the chart.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>st.altair_chart(chart)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then, when the app is run, the script is run from top to bottom. When the user changes something, the entire script runs again in order to update what is shown. In the case of the script above, the app would show a title, then a drop-down list, then a chart. If the user changes their selection in the drop-down list, the chart changes as well.</p>
+<p>With this simple framework, one can quickly create an interface through which other people can interact with a dashboard or even a predictive model, so it will most likely be useful for future projects. For more information, visit the <a href="https://streamlit.io/">Streamlit website</a>.</p>
+</section>
+<section id="altair-package-for-data-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="altair-package-for-data-visualization">Altair package for data visualization</h2>
+<p>Another important skill I used for this project was making charts using Altair. This package allows me to create charts using a simple grammar which minimizes the amount of code needed. This usually involves the following steps:</p>
+<ul>
+<li>Make a <code>Chart</code> object and pass a DataFrame to it</li>
+<li>Specify a mark type, which determines the shapes used to represent data. The options include bar, boxplot, line, area, point, etc.</li>
+<li>Specify encodings. This means deciding which variables are used in the chart, and how so.</li>
+<li>Specify properties. These may include the chart title, font size, text rotation, etc.</li>
+</ul>
+<p>You can experience a simplified version of these steps by using the Graphing Tool in agriHanda.</p>
+<p>In terms of code, an example would look like this:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> (</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    alt.Chart(df)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    .mark_boxplot() <span class="co"># Make a boxplot</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    .encode(y <span class="op">=</span> input_variable, <span class="bu">type</span> <span class="op">=</span> <span class="st">'quantitative'</span>) <span class="co"># Use the input variable on the y-axis</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    .properties(title <span class="op">=</span> <span class="st">'Boxplot'</span>) <span class="co"># Set a title</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    .interactive() <span class="co"># Make the chart interactive</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Apart from the basic steps, I also learned how to use bindings, selections, and conditions. These are advanced techniques which make charts more interactive. In my case, I used these to add a slider to the Map of Butuan City feature so that only barangays near a certain value would be highlighted. This allows the user to, for example, only highlight places with high exposure to a hazard.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/agriHanda/agriHanda-map-with-slider.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<center>
+<i>The slider is set to only highlight barangays with the highest vulnerability score.</i>
+</center>
+<p><br></p>
+<p>For more information about Altair, visit their <a href="https://altair-viz.github.io/">documentation</a>.</p>
+</section>
+<section id="git-and-github-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="git-and-github-workflow">Git and GitHub workflow</h2>
+<p>Another very important thing I learned was how to use basic git commands to manage my repository.</p>
+<p>Originally, I created a blank repository, then dragged the files to GitHub and pressed “commit.” I committed files in this way every time that I made a change. I later learned, however, that this was not the most efficient way to do things.</p>
+<p>At some point, I learned that I could <em>clone</em> my repository to my laptop. This means that the files would be downloaded to a folder in my laptop, which would serve as my <em>workspace</em>. After I edit something in my workspace, I can commit the changes to my <em>local repository</em>. Thus, a snapshot of my files is saved, and I can go back to old versions if I need to. I can then push the changes to my <em>remote repository</em>, which is usually on GitHub. Thus, the latest changes to the repository are stored online.</p>
+<p>In the case of agriHanda, since the Streamlit app is deployed from the GitHub repository, I can easily change the app just by pushing to the repository.</p>
+<p>Admittedly, I am not familiar with using git commands in the command line. I rely on GitHub Desktop and Visual Studio Code, which provide graphical user interfaces for git commands. However, I hope to learn how to use Git Bash eventually.</p>
+<p>The next step I can take would be to study articles like <a href="https://developer.ibm.com/tutorials/d-learn-workings-git/">this article</a> by Fachat (2021), so that I can better understand how git works and how to write commands.</p>
+</section>
+<section id="writing-a-readme-and-documentation" class="level2">
+<h2 class="anchored" data-anchor-id="writing-a-readme-and-documentation">Writing a README and Documentation</h2>
+<p>Lastly, the agriHanda project was my first time writing a serious README and documentation for my repository. I mainly followed the GitHub <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes">guide for READMEs</a>. I made sure to put only the most essential information in the README, including a brief description, a link tot he documentation, the sources of the open data used in the project, the names and roles of our team members, and a statement on the terms of use of the project.</p>
+<p>Then, in the documentation, I wrote more thoroughly about the project. It included the background of the project, purpose and objectives, main access links, explanations of the cleaned dataset and the web app, the procedure from data cleaning to app development, a local development guide for editing the project on one’s local device, recommendations for how to improve the project, the credits to our team members, and a bibiography. You can read the agriHanda documentation <a href="https://docs.google.com/document/d/1feKAvHEzJG2PmKtZrXvsGHOJL4c-kaTc4b_W_fHP-68/edit?usp=sharing">here</a>.</p>
+<hr>
+<p>That’s all for this post. Thanks for reading!</p>
+</section>
+</section>
+<section id="bibliography" class="level1">
+<h1>Bibliography</h1>
+<p>About READMEs. (2021). GitHub Docs. https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes</p>
+<p>Altair: Declarative Visualization in Python—Altair 4.2.0rc1 documentation. (2020). Altair. https://altair-viz.github.io/</p>
+<p>Development Academy of the Philippines. (n.d.-a). Approach to innovations and innovative techniques to food sufficiency using data and technology. Sparta Portal. Retrieved December 17, 2021, from https://sparta.dap.edu.ph/opendata/lgu/butuancity/challenges/butuancity-agriculture</p>
+<p>Development Academy of the Philippines. (n.d.-b). Butuan City. Sparta Portal. Retrieved December 17, 2021, from https://sparta.dap.edu.ph/opendata/lgu/butuancity/details</p>
+<p>Development Academy of the Philippines. (2021, November 15). Winners of First-ever Hackathon and Open Data Challenge Recognized. Sparta Portal. https://sparta.dap.edu.ph/news/winners-first-ever-hackathon-and-open-data-challenge-recognized</p>
+<p>Fachat, A. (2021, July 20). Learn the workings of Git, not just the commands. IBM Developer. https://developer.ibm.com/tutorials/d-learn-workings-git/</p>
+<p>Streamlit • The fastest way to build and share data apps. (2021). Streamlit. https://streamlit.io/ The pandas development team. (2021). MultiIndex / advanced indexing—Pandas 1.3.5 documentation. Pandas. https://pandas.pydata.org/docs/user_guide/advanced.html</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

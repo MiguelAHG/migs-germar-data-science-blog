@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Migs Germar">
+<meta name="dcterms.date" content="2021-05-28">
+<meta name="description" content="I detail the process of creating an explanatory chart that compares exchange rate trends before and during the COVID-19 pandemic.">
+
+<title>Migs Germar’s Data Science Blog - Making an Explanatory Chart of USD-PHP Exchange Rates</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../posts/images/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Migs Germar’s Data Science Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MiguelAHG" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/migs-germar/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.facebook.com/miguelantonio.germar" rel="" target=""><i class="bi bi-facebook" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Making an Explanatory Chart of USD-PHP Exchange Rates</h1>
+                  <div>
+        <div class="description">
+          I detail the process of creating an explanatory chart that compares exchange rate trends before and during the COVID-19 pandemic.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">matplotlib</div>
+                <div class="quarto-category">seaborn</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Migs Germar </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 28, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#package-installs" id="toc-package-installs" class="nav-link" data-scroll-target="#package-installs">Package Installs</a></li>
+  <li><a href="#data-overview" id="toc-data-overview" class="nav-link" data-scroll-target="#data-overview">Data Overview</a></li>
+  <li><a href="#data-cleaning" id="toc-data-cleaning" class="nav-link" data-scroll-target="#data-cleaning">Data Cleaning</a>
+  <ul class="collapse">
+  <li><a href="#column-labels" id="toc-column-labels" class="nav-link" data-scroll-target="#column-labels">Column Labels</a></li>
+  <li><a href="#date-column" id="toc-date-column" class="nav-link" data-scroll-target="#date-column">Date Column</a></li>
+  <li><a href="#descriptive-statistics" id="toc-descriptive-statistics" class="nav-link" data-scroll-target="#descriptive-statistics">Descriptive Statistics</a></li>
+  <li><a href="#exchange-rate-outliers" id="toc-exchange-rate-outliers" class="nav-link" data-scroll-target="#exchange-rate-outliers">Exchange Rate Outliers</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#basic-line-chart" id="toc-basic-line-chart" class="nav-link" data-scroll-target="#basic-line-chart">Basic Line Chart</a></li>
+  <li><a href="#rolling-average" id="toc-rolling-average" class="nav-link" data-scroll-target="#rolling-average">Rolling Average</a></li>
+  </ul></li>
+  <li><a href="#explanatory-chart" id="toc-explanatory-chart" class="nav-link" data-scroll-target="#explanatory-chart">Explanatory Chart</a>
+  <ul class="collapse">
+  <li><a href="#key-concepts" id="toc-key-concepts" class="nav-link" data-scroll-target="#key-concepts">Key Concepts</a>
+  <ul class="collapse">
+  <li><a href="#familiarity" id="toc-familiarity" class="nav-link" data-scroll-target="#familiarity">Familiarity</a></li>
+  <li><a href="#data-ink-ratio" id="toc-data-ink-ratio" class="nav-link" data-scroll-target="#data-ink-ratio">Data-Ink Ratio</a></li>
+  <li><a href="#gestalt-psychology" id="toc-gestalt-psychology" class="nav-link" data-scroll-target="#gestalt-psychology">Gestalt Psychology</a></li>
+  </ul></li>
+  <li><a href="#visual-style" id="toc-visual-style" class="nav-link" data-scroll-target="#visual-style">Visual Style</a></li>
+  <li><a href="#setting-up-subplots" id="toc-setting-up-subplots" class="nav-link" data-scroll-target="#setting-up-subplots">Setting up Subplots</a></li>
+  <li><a href="#the-upper-subplot" id="toc-the-upper-subplot" class="nav-link" data-scroll-target="#the-upper-subplot">The Upper Subplot</a></li>
+  <li><a href="#lower-subplot" id="toc-lower-subplot" class="nav-link" data-scroll-target="#lower-subplot">Lower Subplot</a></li>
+  <li><a href="#figure-level-customization" id="toc-figure-level-customization" class="nav-link" data-scroll-target="#figure-level-customization">Figure-Level Customization</a></li>
+  <li><a href="#full-code" id="toc-full-code" class="nav-link" data-scroll-target="#full-code">Full Code</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>“Explanatory” visualizations are created in order to explain something to other people. These are made to inform <strong>general, non-technical audiences</strong>. Thus, we want to make a chart with the following characteristics:</p>
+<ul>
+<li>Eye-catching</li>
+<li>Visually pleasing</li>
+<li>Easy to understand</li>
+<li>Has a clear main point, as opposed to being too detailed</li>
+</ul>
+<p>Put simply, it is <strong>similar to an infographic</strong>. However, instead of being a standalone image, it is usually put in an article with accompanying text.</p>
+<p>In this project, I detail the process of designing an explanatory chart of USD-PHP exchange rates. I used the <a href="https://www.kaggle.com/altinsoyemrecan/daily-updated-forex-data-since-201111">“Forex data since 2011-1-1”</a> dataset, which was uploaded by user <code>emrecanaltinsoy</code> on Kaggle. By the end of the project, I was able to make the following chart.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/2021-05-28-explanatory-chart.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">A chart about USD-PHP exchange rates over time.</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The larger implications of exchange rate trends are beyond the scope of this project. For Filipinos, I suggest reading <a href="https://www.rappler.com/voices/thought-leaders/analysis-why-stronger-peso-mirrors-weaker-philippine-economy">“[ANALYSIS] Why the stronger peso mirrors a weaker PH economy”</a> (Punongbayan 2020), which is an interesting recent article.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I wrote this notebook for the <a href="https://www.dataquest.io/">Dataquest</a> course’s <a href="https://app.dataquest.io/m/529/guided-project%3A-storytelling-data-visualization-on-exchange-rates/7/next-steps">Guided Project: Storytelling Data Visualization on Exchange Rates</a>. However, all of the text and code here are written by me unless stated otherwise.</p>
+</div>
+</div>
+</section>
+<section id="package-installs" class="level1">
+<h1>Package Installs</h1>
+<div class="cell" data-execution_count="76">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> datetime <span class="im">as</span> dt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.style <span class="im">as</span> style</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.lines <span class="im">as</span> lines</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Use matplotlib's default style.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>style.use(<span class="st">"default"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="data-overview" class="level1">
+<h1>Data Overview</h1>
+<p>The <a href="https://www.kaggle.com/altinsoyemrecan/daily-updated-forex-data-since-201111">“Forex data since 2011-1-1”</a> dataset contains USD exchange rates for various currencies, each in a different column. Every row corresponds to one day, and the dataset has been updated every day since January 1, 2011. My copy was downloaded on May 27, 2021.</p>
+<p>Below are the first 5 rows of the dataset.</p>
+<div class="cell" data-execution_count="77">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>exchange <span class="op">=</span> pd.read_csv(<span class="st">"./private/2021-05-28-MEC-Files/forex_usd_data.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>exchange.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="77">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date(y-m-d)</th>
+<th data-quarto-table-cell-role="th">Argentine Peso</th>
+<th data-quarto-table-cell-role="th">Australian Dollar</th>
+<th data-quarto-table-cell-role="th">Bahraini Dinar</th>
+<th data-quarto-table-cell-role="th">Botswana Pula</th>
+<th data-quarto-table-cell-role="th">Brazilian Real</th>
+<th data-quarto-table-cell-role="th">Bruneian Dollar</th>
+<th data-quarto-table-cell-role="th">Bulgarian Lev</th>
+<th data-quarto-table-cell-role="th">Canadian Dollar</th>
+<th data-quarto-table-cell-role="th">Chilean Peso</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">Sri Lankan Rupee</th>
+<th data-quarto-table-cell-role="th">Swedish Krona</th>
+<th data-quarto-table-cell-role="th">Swiss Franc</th>
+<th data-quarto-table-cell-role="th">Taiwan New Dollar</th>
+<th data-quarto-table-cell-role="th">Thai Baht</th>
+<th data-quarto-table-cell-role="th">Trinidadian Dollar</th>
+<th data-quarto-table-cell-role="th">Turkish Lira</th>
+<th data-quarto-table-cell-role="th">Emirati Dirham</th>
+<th data-quarto-table-cell-role="th">British Pound</th>
+<th data-quarto-table-cell-role="th">Venezuelan Bolivar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2011-01-01</td>
+<td>3.9690</td>
+<td>0.977326</td>
+<td>0.377050</td>
+<td>6.472492</td>
+<td>1.659500</td>
+<td>1.284500</td>
+<td>1.463830</td>
+<td>0.997700</td>
+<td>467.750000</td>
+<td>...</td>
+<td>110.940002</td>
+<td>6.721450</td>
+<td>0.934500</td>
+<td>29.140000</td>
+<td>30.020000</td>
+<td>6.34</td>
+<td>1.537400</td>
+<td>3.67310</td>
+<td>0.640553</td>
+<td>4.3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2011-01-02</td>
+<td>3.9690</td>
+<td>0.977326</td>
+<td>0.377050</td>
+<td>6.472492</td>
+<td>1.659500</td>
+<td>1.283500</td>
+<td>1.463830</td>
+<td>0.997700</td>
+<td>467.750000</td>
+<td>...</td>
+<td>110.940002</td>
+<td>6.721450</td>
+<td>0.933800</td>
+<td>29.099001</td>
+<td>30.020000</td>
+<td>6.34</td>
+<td>1.537400</td>
+<td>3.67310</td>
+<td>0.641067</td>
+<td>4.3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2011-01-03</td>
+<td>3.9735</td>
+<td>0.980569</td>
+<td>0.377055</td>
+<td>6.472492</td>
+<td>1.646288</td>
+<td>1.284367</td>
+<td>1.462799</td>
+<td>0.990444</td>
+<td>465.649994</td>
+<td>...</td>
+<td>110.919998</td>
+<td>6.693788</td>
+<td>0.933069</td>
+<td>29.120000</td>
+<td>30.084999</td>
+<td>6.39</td>
+<td>1.557411</td>
+<td>3.67320</td>
+<td>0.645615</td>
+<td>4.3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2011-01-04</td>
+<td>3.9710</td>
+<td>0.995580</td>
+<td>0.377060</td>
+<td>6.480881</td>
+<td>1.666747</td>
+<td>1.287438</td>
+<td>1.469525</td>
+<td>0.999076</td>
+<td>487.850006</td>
+<td>...</td>
+<td>110.820000</td>
+<td>6.726967</td>
+<td>0.947903</td>
+<td>29.175004</td>
+<td>30.104903</td>
+<td>6.36</td>
+<td>1.547801</td>
+<td>3.67315</td>
+<td>0.641558</td>
+<td>4.3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2011-01-05</td>
+<td>3.9715</td>
+<td>0.999522</td>
+<td>0.377050</td>
+<td>6.548788</td>
+<td>1.670312</td>
+<td>1.291450</td>
+<td>1.485031</td>
+<td>0.994376</td>
+<td>495.149993</td>
+<td>...</td>
+<td>110.820000</td>
+<td>6.766127</td>
+<td>0.964490</td>
+<td>29.170000</td>
+<td>30.216193</td>
+<td>6.38</td>
+<td>1.543853</td>
+<td>3.67310</td>
+<td>0.645308</td>
+<td>4.3</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 54 columns</p>
+</div>
+</div>
+</div>
+<p>We are only interested in USD-PHP exchange rates, so we will take the “Philippine Peso” column.</p>
+<div class="cell" data-execution_count="78">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>php <span class="op">=</span> exchange[[<span class="st">"date(y-m-d)"</span>, <span class="st">"Philippine Peso"</span>]].copy()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>php.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="78">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date(y-m-d)</th>
+<th data-quarto-table-cell-role="th">Philippine Peso</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2011-01-01</td>
+<td>43.639999</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2011-01-02</td>
+<td>43.639999</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2011-01-03</td>
+<td>43.799999</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2011-01-04</td>
+<td>43.550002</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2011-01-05</td>
+<td>43.900002</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Below is more information on the 2 columns.</p>
+<div class="cell" data-execution_count="79">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>php.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 3798 entries, 0 to 3797
+Data columns (total 2 columns):
+ #   Column           Non-Null Count  Dtype  
+---  ------           --------------  -----  
+ 0   date(y-m-d)      3798 non-null   object 
+ 1   Philippine Peso  3798 non-null   float64
+dtypes: float64(1), object(1)
+memory usage: 59.5+ KB</code></pre>
+</div>
+</div>
+<p>The dataset has 3798 entries and 2 columns. There are no missing values.</p>
+<p>The date column contains text, whereas the PHP column contains decimal numbers.</p>
+</section>
+<section id="data-cleaning" class="level1">
+<h1>Data Cleaning</h1>
+<section id="column-labels" class="level2">
+<h2 class="anchored" data-anchor-id="column-labels">Column Labels</h2>
+<p>The column labels will first be changed so that these are easier to use.</p>
+<div class="cell" data-execution_count="80">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>php.columns <span class="op">=</span> [<span class="st">"date"</span>, <span class="st">"usd_php"</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>php.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="80">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">usd_php</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2011-01-01</td>
+<td>43.639999</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2011-01-02</td>
+<td>43.639999</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2011-01-03</td>
+<td>43.799999</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2011-01-04</td>
+<td>43.550002</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2011-01-05</td>
+<td>43.900002</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="date-column" class="level2">
+<h2 class="anchored" data-anchor-id="date-column">Date Column</h2>
+<p>The <code>date</code> column contains text with the format {4 digit year}-{2 digit month}-{2 digit day}.</p>
+<p>Below, I convert the text to <code>datetime</code> objects for ease of use.</p>
+<div class="cell" data-execution_count="81">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>php[<span class="st">"date"</span>] <span class="op">=</span> pd.to_datetime(php[<span class="st">"date"</span>])</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>php.sort_values(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    by <span class="op">=</span> <span class="st">"date"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    ascending <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    inplace <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>php[<span class="st">"date"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="81">
+<pre><code>0      2011-01-01
+1      2011-01-02
+2      2011-01-03
+3      2011-01-04
+4      2011-01-05
+          ...    
+3793   2021-05-21
+3794   2021-05-22
+3795   2021-05-23
+3796   2021-05-24
+3797   2021-05-25
+Name: date, Length: 3798, dtype: datetime64[ns]</code></pre>
+</div>
+</div>
+</section>
+<section id="descriptive-statistics" class="level2">
+<h2 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h2>
+<p>Before we can clean the data, we have to view its descriptive statistics.</p>
+<div class="cell" data-execution_count="82">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>php.describe(datetime_is_numeric <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="82">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">usd_php</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>3798</td>
+<td>3798.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>2016-03-13 12:00:00</td>
+<td>47.010148</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">min</td>
+<td>2011-01-01 00:00:00</td>
+<td>3.094050</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>2013-08-07 06:00:00</td>
+<td>43.639330</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>2016-03-13 12:00:00</td>
+<td>46.890740</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>2018-10-18 18:00:00</td>
+<td>50.584238</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">max</td>
+<td>2021-05-25 00:00:00</td>
+<td>54.323583</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">std</td>
+<td>NaN</td>
+<td>3.920411</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>As expected, the dates range from November 1, 2011 to May 25, 2021.</p>
+<p>However, the minimum USD-PHP exchange rate in the data is 3.09. This is very low compared to the other percentiles.</p>
+</section>
+<section id="exchange-rate-outliers" class="level2">
+<h2 class="anchored" data-anchor-id="exchange-rate-outliers">Exchange Rate Outliers</h2>
+<p>There may be some outliers in the data. We can confirm this using a boxplot.</p>
+<div class="cell" data-execution_count="83">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sns.boxplot(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> php,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"usd_php"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"USD-PHP Exchange Rate Distribution"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"USD-PHP Exchange Rate"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Indeed, most of the values fall between 40 and 55, whereas a few outliers exist below 10. These may be inaccurate data.</p>
+<p>How many outliers are there?</p>
+<div class="cell" data-execution_count="84">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(php[<span class="st">"usd_php"</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a> .value_counts(bins <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a> .sort_index()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="84">
+<pre><code>(3.0420000000000003, 8.217]       2
+(8.217, 13.34]                    0
+(13.34, 18.463]                   0
+(18.463, 23.586]                  0
+(23.586, 28.709]                  0
+(28.709, 33.832]                  0
+(33.832, 38.955]                  0
+(38.955, 44.078]               1157
+(44.078, 49.201]               1289
+(49.201, 54.324]               1350
+Name: usd_php, dtype: int64</code></pre>
+</div>
+</div>
+<p>There are only 2 values less than 10. It is highly unlikely that these values are accurate. This can be shown using a line chart.</p>
+<div class="cell" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> php,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"date"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"usd_php"</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"USD-PHP Exchange Rate Over Time"</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Time"</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"USD-PHP Exchange Rate"</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The outliers exist somewhere in the 2014 data, and they create an unnatural dip in the chart.</p>
+<p>Thus, the inaccurate datapoints will be dropped from the dataset.</p>
+<div class="cell" data-execution_count="86">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>php <span class="op">=</span> php.loc[php[<span class="st">"usd_php"</span>] <span class="op">&gt;</span> <span class="dv">10</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>php.describe(datetime_is_numeric <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="86">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">usd_php</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>3796</td>
+<td>3796.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>2016-03-13 22:32:45.015806208</td>
+<td>47.033285</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">min</td>
+<td>2011-01-01 00:00:00</td>
+<td>40.500000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>2013-08-06 18:00:00</td>
+<td>43.639981</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>2016-03-14 12:00:00</td>
+<td>46.892504</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>2018-10-19 06:00:00</td>
+<td>50.584680</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">max</td>
+<td>2021-05-25 00:00:00</td>
+<td>54.323583</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">std</td>
+<td>NaN</td>
+<td>3.789566</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The minimum USD-PHP rate is now 40.5, which makes more sense.</p>
+</section>
+</section>
+<section id="exploratory-data-analysis" class="level1">
+<h1>Exploratory Data Analysis</h1>
+<section id="basic-line-chart" class="level2">
+<h2 class="anchored" data-anchor-id="basic-line-chart">Basic Line Chart</h2>
+<p>First, we start with a basic line chart that shows the exchange rates on all days in the dataset.</p>
+<div class="cell" data-execution_count="87">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> php,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"date"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"usd_php"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"USD-PHP Exchange Rate Over Time"</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Time"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"USD-PHP Exchange Rate"</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The chart shows that the exchange rate dropped to under 41.0 in 2013. It then steadily climbed up to over 54.0 in 2018 before moving down again afterwards.</p>
+<p>For Filipinos, it is ideal for the USD-PHP rate to be lower so that the peso has more power. Thus, it can be said that the exchange rate was better from 2011 to 2015 compared to how it has been in recent years. However, note that the USD-PHP exchange rate is not the only descriptor of the Philippines’ economy.</p>
+</section>
+<section id="rolling-average" class="level2">
+<h2 class="anchored" data-anchor-id="rolling-average">Rolling Average</h2>
+<p>In order to focus more on general trends than small fluctuations, we can graph the <strong>rolling average</strong> (or moving average). The rolling average is taken by replacing each datapoint with the mean average of a certain number of the datapoints leading up to it.</p>
+<p>Using a rolling average can make a graph look <strong>visually cleaner</strong> and make <strong>general trends</strong> easier to see.</p>
+<p>The number of datapoints used in each average is called the rolling window. This can be specified in Pandas using <code>pd.Series.rolling()</code>. Below, we use a rolling window of 182 days (around half a year) in order to transform the rate data.</p>
+<div class="cell" data-execution_count="88">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>php[<span class="st">"rolling"</span>] <span class="op">=</span> php[<span class="st">"usd_php"</span>].rolling(<span class="dv">182</span>).mean()</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>php.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="88">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">usd_php</th>
+<th data-quarto-table-cell-role="th">rolling</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3793</td>
+<td>2021-05-21</td>
+<td>47.919983</td>
+<td>48.237840</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3794</td>
+<td>2021-05-22</td>
+<td>47.929517</td>
+<td>48.236031</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3795</td>
+<td>2021-05-23</td>
+<td>47.929517</td>
+<td>48.234226</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3796</td>
+<td>2021-05-24</td>
+<td>48.068599</td>
+<td>48.232923</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3797</td>
+<td>2021-05-25</td>
+<td>48.155798</td>
+<td>48.232809</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The last 5 rows of the dataset are shown above. The rolling averages are not exactly equal to the original numbers, but these are close enough to show the same trend.</p>
+<p>A line chart of the rolling averages is shown below.</p>
+<div class="cell" data-execution_count="89">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> php,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"date"</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="st">"rolling"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"USD-PHP Exchange Rate Over Time: Rolling Average"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Time"</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"USD-PHP Exchange Rate"</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The same trends mentioned earlier are clearer to see in the above chart.</p>
+</section>
+</section>
+<section id="explanatory-chart" class="level1">
+<h1>Explanatory Chart</h1>
+<p>One idea of a useful chart would be to compare the USD-PHP exchange rate trends before and during the COVID-19 pandemic.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A similar idea was suggested in the Dataquest guided project. However, I did not look at Dataquest’s solution notebook. I wrote my code on my own.</p>
+</div>
+</div>
+<section id="key-concepts" class="level2">
+<h2 class="anchored" data-anchor-id="key-concepts">Key Concepts</h2>
+<p>The following concepts will be used throughout the process of designing the chart. I learned these from Dataquest’s “Data Scientist in Python” course.</p>
+<section id="familiarity" class="level3">
+<h3 class="anchored" data-anchor-id="familiarity">Familiarity</h3>
+<p>Audiences prefer <strong>familiar charts</strong> since they can understand these easily. Therefore, it is better to use a basic chart as a template than to use something obscure or create something entirely new.</p>
+<p>In the case of showing USD-PHP exchange rates over time, it is best to use a <strong>basic line chart</strong> as a template.</p>
+</section>
+<section id="data-ink-ratio" class="level3">
+<h3 class="anchored" data-anchor-id="data-ink-ratio">Data-Ink Ratio</h3>
+<p>When making an explanatory chart, one must maximize the data-ink ratio.</p>
+<ul>
+<li>Data refers to the elements that represent data and its relationships, like <strong>bars and lines</strong>.</li>
+<li>Ink refers to the <strong>total amount of ink</strong> that the chart would use if it were printed on paper.</li>
+</ul>
+<p>Maximizing the data-ink ratio means focusing more on data-related elements and <strong>minimizing the use of other, less important elements</strong>.</p>
+<p>This helps the audience understand the main point without being distracted by other details.</p>
+</section>
+<section id="gestalt-psychology" class="level3">
+<h3 class="anchored" data-anchor-id="gestalt-psychology">Gestalt Psychology</h3>
+<p><a href="https://www.verywellmind.com/what-is-gestalt-psychology-2795808">Gestalt psychology</a> is founded on the idea that people tend to <strong>see patterns</strong> rather than individual objects.</p>
+<p>Under Gestalt psychology, there are several Principles of Grouping. These are ways to visually group elements together.</p>
+<ul>
+<li>Proximity: Elements are close to each other</li>
+<li>Similarity: Elements are similar due to color, shape, etc.</li>
+<li>Enclosure: Elements are enclosed in an outer shape, like a rectangle</li>
+<li>Connection: Elements are connected by a form, usually a line</li>
+</ul>
+<p>When designing charts, these are helpful in <strong>implying relationships between elements</strong> instead of explicitly stating them.</p>
+</section>
+</section>
+<section id="visual-style" class="level2">
+<h2 class="anchored" data-anchor-id="visual-style">Visual Style</h2>
+<p>Before we start making the chart, we have to choose a style.</p>
+<p>I chose Matplotlib’s built-in “fivethirtyeight” style. It’s based on the style of the charts used on the <a href="https://fivethirtyeight.com/">FiveThirtyEight</a> website by Nate Silver.</p>
+<p>Additionally, I used <a href="https://www.color-hex.com/">color-hex.com</a> to get hex codes for specific kinds of blue, orange, and dark gray that I want to use in my chart.</p>
+<div class="cell" data-execution_count="90">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the FiveThirtyEight style of charts.</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>style.use(<span class="st">"fivethirtyeight"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Color hex codes</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>c_blue <span class="op">=</span> <span class="st">"#14c4dd"</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>c_orange <span class="op">=</span> <span class="st">"#ffa500"</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>c_dark_gray <span class="op">=</span> <span class="st">"#d2d2d2"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="setting-up-subplots" class="level2">
+<h2 class="anchored" data-anchor-id="setting-up-subplots">Setting up Subplots</h2>
+<p>In order to make the chart fresh and interesting, we have to make it more complex than 1 plot with a line chart. In our case, I have the following ideas:</p>
+<ul>
+<li>Show 2 line charts, one on top of the other.</li>
+<li>The upper chart shows how the rate changed from 2011 to 2021.</li>
+<li>The lower chart zooms into the pandemic portion of the line chart from 2020 to 2021.</li>
+</ul>
+<p>In order to do this, I will create a Matplotlib <code>Figure</code> with two <code>Axes</code> (subplots), as described above.</p>
+<div class="cell" data-execution_count="91">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Figure has 2 rows and 1 column.</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># There is an upper and lower subplot.</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    nrows <span class="op">=</span> <span class="dv">2</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    ncols <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">10</span>), <span class="co"># 10 inches x 10 inches</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    dpi <span class="op">=</span> <span class="dv">80</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="the-upper-subplot" class="level2">
+<h2 class="anchored" data-anchor-id="the-upper-subplot">The Upper Subplot</h2>
+<p>Next, we design the upper subplot. Here’s what it looks like with a basic line chart of the raw exchange rate data.</p>
+<div class="cell" data-execution_count="92">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ax1.plot(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    php[<span class="st">"date"</span>],</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    php[<span class="st">"usd_php"</span>],</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_blue,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="92">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-18-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The line above looks messy. For the general audience, the overall trends are more important than the specific daily values. Thus, we will use the <strong>rolling average</strong> to make the chart cleaner.</p>
+<div class="cell" data-execution_count="93">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ax1.clear()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>ax1.plot(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    php[<span class="st">"date"</span>],</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    php[<span class="st">"rolling"</span>],</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_blue,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="93">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Additionally, we will split the line into:</p>
+<ul>
+<li>The pre-pandemic portion (blue)</li>
+<li>The pandemic portion (orange)</li>
+</ul>
+<p>The pandemic portion will also be enclosed in a dark gray box, in order to further separate it from the pre-pandemic portion.</p>
+<div class="cell" data-execution_count="94">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ax1.clear()</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Main line chart (2011-2019)</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>php_pre <span class="op">=</span> php.loc[php[<span class="st">"date"</span>].dt.year <span class="op">&lt;</span> <span class="dv">2020</span>]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>ax1.plot(</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    php_pre[<span class="st">"date"</span>],</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    php_pre[<span class="st">"rolling"</span>],</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_blue,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Pandemic part of line chart (2020-2021)</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>php_pandemic <span class="op">=</span> php.loc[php[<span class="st">"date"</span>].dt.year.between(<span class="dv">2020</span>, <span class="dv">2021</span>)]</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>ax1.plot(</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"date"</span>],</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"rolling"</span>],</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_orange,</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Special background for pandemic portion</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>ax1.axvspan(</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2020-01"</span>,</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2021-05-25"</span>,</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    facecolor <span class="op">=</span> c_dark_gray,</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="94">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Next, we want to maximize the data-ink ratio by removing unnecessary elements. We will do the following:</p>
+<ul>
+<li>On the x-axis, show only the labels for 2012, 2016, and 2020.</li>
+<li>On the y-axis, show only the labels for 48, 50, and 52.</li>
+<li>Remove grid lines.</li>
+</ul>
+<p>We will also add 1 grid line at y = 50 so that it can guide viewers. It would be particularly helpful for Filipino viewers since they commonly think that USD 1 = PHP 50.</p>
+<div class="cell" data-execution_count="95">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set tick label color to gray.</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ax1.tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, colors <span class="op">=</span> <span class="st">'gray'</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specific tick labels</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>ax1.set_xticks([<span class="st">"2012"</span>, <span class="st">"2016"</span>, <span class="st">"2020"</span>])</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>ax1.set_xticklabels([<span class="st">"2012"</span>, <span class="st">"2016"</span>, <span class="st">"2020"</span>])</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>ax1.set_yticks([<span class="dv">48</span>, <span class="dv">50</span>, <span class="dv">52</span>])</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>ax1.set_yticklabels([<span class="st">"48"</span>, <span class="st">"50"</span>, <span class="st">"52"</span>])</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove grid</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>ax1.grid(<span class="va">False</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Horizontal line at y = 50</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>ax1.axhline(<span class="dv">50</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, color <span class="op">=</span> <span class="st">"gray"</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="95">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-21-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now, the upper subplot is much cleaner; there is less visual noise.</p>
+<p>The last step for the upper subplot would be to add informative text:</p>
+<ul>
+<li>“Pre-Pandemic” label for the blue line</li>
+<li>A comment about the upward trend leading up to 2018</li>
+</ul>
+<div class="cell" data-execution_count="96">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># "Pre-Pandemic" label</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ax1.text(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> dt.date(year <span class="op">=</span> <span class="dv">2013</span>, month <span class="op">=</span> <span class="dv">7</span>, day <span class="op">=</span> <span class="dv">1</span>),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="dv">48</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"Pre-Pandemic"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"gray"</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">14</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Comment on upward trend</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>ax1.text(</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> dt.date(year <span class="op">=</span> <span class="dv">2018</span>, month <span class="op">=</span> <span class="dv">10</span>, day <span class="op">=</span> <span class="dv">1</span>),</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="dv">46</span>,</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"Rate climbs up to 54</span><span class="ch">\n</span><span class="st">in Oct 2018"</span>,</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">11</span>,</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="96">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-22-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The “Pre-Pandemic” label was set to gray because it is a structural element; it is less important.</p>
+<p>On the other hand, the long comment was set to black because it states a statistic from the data and helps tell a story about the data. It is more important, so it should be darker.</p>
+<p>We have finished designing the upper subplot.</p>
+</section>
+<section id="lower-subplot" class="level2">
+<h2 class="anchored" data-anchor-id="lower-subplot">Lower Subplot</h2>
+<p>Next, the lower subplot will zoom in on the pandemic portion of the data, which is from 2020 to 2021. Since this is the more important part, we should use the <strong>raw data</strong> for more detail.</p>
+<div class="cell" data-execution_count="97">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pandemic portion, zoomed in</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ax2.plot(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"date"</span>],</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"usd_php"</span>],</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_orange,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="97">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-23-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Then, we will make changes similar to the ones done for the upper subplot:</p>
+<ul>
+<li>On the x-axis, show only the labels for January 2020, July 2020, and January 2021.</li>
+<li>On the y-axis, show only the labels for 48, 50, and 52.</li>
+<li>Remove grid lines.</li>
+<li>Add 1 grid line at y = 50.</li>
+<li>Enclose the entire line in a dark gray box.</li>
+</ul>
+<div class="cell" data-execution_count="98">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set tick labels to gray.</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>ax2.tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, colors <span class="op">=</span> <span class="st">'gray'</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specific tick labels.</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>ax2.set_xticks([<span class="st">"2020-01"</span>, <span class="st">"2020-07"</span>, <span class="st">"2021-01"</span>])</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>ax2.set_xticklabels([<span class="st">'Jan 2020'</span>, <span class="st">'Jul 2020'</span>, <span class="st">'Jan 2021'</span>])</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>ax2.set_yticks([<span class="dv">48</span>, <span class="dv">50</span>, <span class="dv">52</span>])</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>ax2.set_yticklabels([<span class="st">"48"</span>, <span class="st">"50"</span>, <span class="st">"52"</span>])</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove grid</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>ax2.grid(<span class="va">False</span>)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Horizontal line at y = 50</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>ax2.axhline(<span class="dv">50</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, color <span class="op">=</span> <span class="st">"gray"</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Special background for pandemic portion</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>ax2.axvspan(</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2020-01"</span>,</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2021-05-25"</span>,</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    facecolor <span class="op">=</span> c_dark_gray,</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="98">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-24-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We are using the principles of <strong>enclosure</strong> and <strong>similarity</strong> to visually imply that the pandemic portion in the upper subplot is being shown more closely in the lower subplot.</p>
+<ul>
+<li>Enclosure: dark gray boxes</li>
+<li>Similarity: orange lines, horizontal grid line, y-axis labels</li>
+</ul>
+<p>Next, we add another comment in black text, this time about the downward trend leading up to the present day.</p>
+<div class="cell" data-execution_count="99">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Comment on downward trend</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>ax2.text(</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> dt.date(year <span class="op">=</span> <span class="dv">2021</span>, month <span class="op">=</span> <span class="dv">1</span>, day <span class="op">=</span> <span class="dv">1</span>),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">49.25</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"Rate drops down to 48</span><span class="ch">\n</span><span class="st">in May 2021"</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">11</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="99">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-25-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We have finished designing the lower subplot. However, we still need to add some finishing touches.</p>
+</section>
+<section id="figure-level-customization" class="level2">
+<h2 class="anchored" data-anchor-id="figure-level-customization">Figure-Level Customization</h2>
+<p>In this last step, we customize the chart on the level of the Matplotlib <code>Figure</code>. This involves both of the subplots and the space around them.</p>
+<p>What we want to do is to use the principles of <strong>proximity</strong> and <strong>connection</strong> to make the relationship between the 2 subplots even clearer.</p>
+<ul>
+<li>Proximity: Increase the space between the two subplots.</li>
+<li>Connection: Draw a line connecting the two dark gray boxes.
+<ul>
+<li>Add a “COVID-19 Pandemic” label next to the line.</li>
+</ul></li>
+</ul>
+<p>These are done in the code below.</p>
+<div class="cell" data-execution_count="100">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add space between the subplots</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>fig.tight_layout(pad <span class="op">=</span> <span class="dv">5</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Line connection between gray boxes</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>fig.add_artist( </span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    lines.Line2D(</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        xdata <span class="op">=</span> [<span class="fl">0.82</span>, <span class="fl">0.82</span>],</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>        ydata <span class="op">=</span> [<span class="fl">0.44</span>, <span class="fl">0.585</span>],</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>        color <span class="op">=</span> c_dark_gray,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>        alpha <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co"># "COVID-19" label between subplots</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>fig.text(</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"COVID-19 Pandemic"</span>,</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"gray"</span>,</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">14</span>,</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="100">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-26-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now, when one first reads the chart, it is very clear that the gray boxes contain data about exchange rates in the COVID-19 pandemic.</p>
+<p>The last touch would be to add a title and subtitle to the chart. Since the title is typically the first thing a viewer reads on a chart, it is best to <strong>state a statistic</strong> related to the data, like “USD-PHP Rate Drops to 48 after 1 Year in the Pandemic.”</p>
+<p>This way, <strong>the title becomes a data element</strong>. The data-ink ratio is increased.</p>
+<div class="cell" data-execution_count="101">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Title with a statistic</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>fig.text(</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"USD-PHP Rate Drops to 48 after 1 Year in the Pandemic"</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">16</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    weight <span class="op">=</span> <span class="st">"bold"</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Subtitle</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>fig.text(</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">0.92</span>,</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"USD-PHP exchange rate over time"</span>,</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">12</span>,</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="101">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-27-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>That’s it. The explanatory chart is complete.</p>
+</section>
+<section id="full-code" class="level2">
+<h2 class="anchored" data-anchor-id="full-code">Full Code</h2>
+<p>The full code to make the graph is shown below. The comments explain which part does what.</p>
+<div class="cell" data-execution_count="103">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the FiveThirtyEight style of charts.</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>style.use(<span class="st">"fivethirtyeight"</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Color hex codes</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>c_blue <span class="op">=</span> <span class="st">"#14c4dd"</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>c_orange <span class="op">=</span> <span class="st">"#ffa500"</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>c_dark_gray <span class="op">=</span> <span class="st">"#d2d2d2"</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Figure has 2 rows and 1 column.</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="co"># There is an upper and lower subplot.</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    nrows <span class="op">=</span> <span class="dv">2</span>,</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    ncols <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">10</span>),</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>    dpi <span class="op">=</span> <span class="dv">80</span>,</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a><span class="co"># ---UPPER subplot</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Main line chart (2011-2019)</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>php_pre <span class="op">=</span> php.loc[php[<span class="st">"date"</span>].dt.year <span class="op">&lt;</span> <span class="dv">2020</span>]</span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>ax1.plot(</span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>    php_pre[<span class="st">"date"</span>],</span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>    php_pre[<span class="st">"rolling"</span>],</span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_blue,</span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Pandemic part of line chart (2020-2021)</span></span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a>php_pandemic <span class="op">=</span> php.loc[php[<span class="st">"date"</span>].dt.year.between(<span class="dv">2020</span>, <span class="dv">2021</span>)]</span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a>ax1.plot(</span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"date"</span>],</span>
+<span id="cb30-34"><a href="#cb30-34" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"rolling"</span>],</span>
+<span id="cb30-35"><a href="#cb30-35" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_orange,</span>
+<span id="cb30-36"><a href="#cb30-36" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-37"><a href="#cb30-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-38"><a href="#cb30-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Special background for pandemic portion</span></span>
+<span id="cb30-39"><a href="#cb30-39" aria-hidden="true" tabindex="-1"></a>ax1.axvspan(</span>
+<span id="cb30-40"><a href="#cb30-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2020-01"</span>,</span>
+<span id="cb30-41"><a href="#cb30-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2021-05-25"</span>,</span>
+<span id="cb30-42"><a href="#cb30-42" aria-hidden="true" tabindex="-1"></a>    facecolor <span class="op">=</span> c_dark_gray,</span>
+<span id="cb30-43"><a href="#cb30-43" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb30-44"><a href="#cb30-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-45"><a href="#cb30-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-46"><a href="#cb30-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Set tick label color to gray.</span></span>
+<span id="cb30-47"><a href="#cb30-47" aria-hidden="true" tabindex="-1"></a>ax1.tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, colors <span class="op">=</span> <span class="st">'gray'</span>)</span>
+<span id="cb30-48"><a href="#cb30-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-49"><a href="#cb30-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Specific tick labels</span></span>
+<span id="cb30-50"><a href="#cb30-50" aria-hidden="true" tabindex="-1"></a>ax1.set_xticks([<span class="st">"2012"</span>, <span class="st">"2016"</span>, <span class="st">"2020"</span>])</span>
+<span id="cb30-51"><a href="#cb30-51" aria-hidden="true" tabindex="-1"></a>ax1.set_xticklabels([<span class="st">"2012"</span>, <span class="st">"2016"</span>, <span class="st">"2020"</span>])</span>
+<span id="cb30-52"><a href="#cb30-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-53"><a href="#cb30-53" aria-hidden="true" tabindex="-1"></a>ax1.set_yticks([<span class="dv">48</span>, <span class="dv">50</span>, <span class="dv">52</span>])</span>
+<span id="cb30-54"><a href="#cb30-54" aria-hidden="true" tabindex="-1"></a>ax1.set_yticklabels([<span class="st">"48"</span>, <span class="st">"50"</span>, <span class="st">"52"</span>])</span>
+<span id="cb30-55"><a href="#cb30-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-56"><a href="#cb30-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove grid</span></span>
+<span id="cb30-57"><a href="#cb30-57" aria-hidden="true" tabindex="-1"></a>ax1.grid(<span class="va">False</span>)</span>
+<span id="cb30-58"><a href="#cb30-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-59"><a href="#cb30-59" aria-hidden="true" tabindex="-1"></a><span class="co"># Horizontal line at y = 50</span></span>
+<span id="cb30-60"><a href="#cb30-60" aria-hidden="true" tabindex="-1"></a>ax1.axhline(<span class="dv">50</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, color <span class="op">=</span> <span class="st">"gray"</span>)</span>
+<span id="cb30-61"><a href="#cb30-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-62"><a href="#cb30-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Text in upper subplot</span></span>
+<span id="cb30-63"><a href="#cb30-63" aria-hidden="true" tabindex="-1"></a>ax1.text(</span>
+<span id="cb30-64"><a href="#cb30-64" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> dt.date(year <span class="op">=</span> <span class="dv">2018</span>, month <span class="op">=</span> <span class="dv">10</span>, day <span class="op">=</span> <span class="dv">1</span>),</span>
+<span id="cb30-65"><a href="#cb30-65" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="dv">46</span>,</span>
+<span id="cb30-66"><a href="#cb30-66" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"Rate climbs up to 54</span><span class="ch">\n</span><span class="st">in Oct 2018"</span>,</span>
+<span id="cb30-67"><a href="#cb30-67" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span id="cb30-68"><a href="#cb30-68" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">11</span>,</span>
+<span id="cb30-69"><a href="#cb30-69" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-70"><a href="#cb30-70" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-71"><a href="#cb30-71" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-72"><a href="#cb30-72" aria-hidden="true" tabindex="-1"></a>ax1.text(</span>
+<span id="cb30-73"><a href="#cb30-73" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> dt.date(year <span class="op">=</span> <span class="dv">2013</span>, month <span class="op">=</span> <span class="dv">7</span>, day <span class="op">=</span> <span class="dv">1</span>),</span>
+<span id="cb30-74"><a href="#cb30-74" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="dv">48</span>,</span>
+<span id="cb30-75"><a href="#cb30-75" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"Pre-Pandemic"</span>,</span>
+<span id="cb30-76"><a href="#cb30-76" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"gray"</span>,</span>
+<span id="cb30-77"><a href="#cb30-77" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">14</span>,</span>
+<span id="cb30-78"><a href="#cb30-78" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-79"><a href="#cb30-79" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-80"><a href="#cb30-80" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-81"><a href="#cb30-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-82"><a href="#cb30-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-83"><a href="#cb30-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-84"><a href="#cb30-84" aria-hidden="true" tabindex="-1"></a><span class="co"># ---LOWER subplot</span></span>
+<span id="cb30-85"><a href="#cb30-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-86"><a href="#cb30-86" aria-hidden="true" tabindex="-1"></a><span class="co"># Pandemic portion, zoomed in</span></span>
+<span id="cb30-87"><a href="#cb30-87" aria-hidden="true" tabindex="-1"></a>ax2.plot(</span>
+<span id="cb30-88"><a href="#cb30-88" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"date"</span>],</span>
+<span id="cb30-89"><a href="#cb30-89" aria-hidden="true" tabindex="-1"></a>    php_pandemic[<span class="st">"usd_php"</span>],</span>
+<span id="cb30-90"><a href="#cb30-90" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> c_orange,</span>
+<span id="cb30-91"><a href="#cb30-91" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-92"><a href="#cb30-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-93"><a href="#cb30-93" aria-hidden="true" tabindex="-1"></a><span class="co"># Set tick labels to gray.</span></span>
+<span id="cb30-94"><a href="#cb30-94" aria-hidden="true" tabindex="-1"></a>ax2.tick_params(axis <span class="op">=</span> <span class="st">'both'</span>, colors <span class="op">=</span> <span class="st">'gray'</span>)</span>
+<span id="cb30-95"><a href="#cb30-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-96"><a href="#cb30-96" aria-hidden="true" tabindex="-1"></a><span class="co"># Specific tick labels.</span></span>
+<span id="cb30-97"><a href="#cb30-97" aria-hidden="true" tabindex="-1"></a>ax2.set_xticks([<span class="st">"2020-01"</span>, <span class="st">"2020-07"</span>, <span class="st">"2021-01"</span>])</span>
+<span id="cb30-98"><a href="#cb30-98" aria-hidden="true" tabindex="-1"></a>ax2.set_xticklabels([<span class="st">'Jan 2020'</span>, <span class="st">'Jul 2020'</span>, <span class="st">'Jan 2021'</span>])</span>
+<span id="cb30-99"><a href="#cb30-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-100"><a href="#cb30-100" aria-hidden="true" tabindex="-1"></a>ax2.set_yticks([<span class="dv">48</span>, <span class="dv">50</span>, <span class="dv">52</span>])</span>
+<span id="cb30-101"><a href="#cb30-101" aria-hidden="true" tabindex="-1"></a>ax2.set_yticklabels([<span class="st">"48"</span>, <span class="st">"50"</span>, <span class="st">"52"</span>])</span>
+<span id="cb30-102"><a href="#cb30-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-103"><a href="#cb30-103" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove grid</span></span>
+<span id="cb30-104"><a href="#cb30-104" aria-hidden="true" tabindex="-1"></a>ax2.grid(<span class="va">False</span>)</span>
+<span id="cb30-105"><a href="#cb30-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-106"><a href="#cb30-106" aria-hidden="true" tabindex="-1"></a><span class="co"># Horizontal line at y = 50</span></span>
+<span id="cb30-107"><a href="#cb30-107" aria-hidden="true" tabindex="-1"></a>ax2.axhline(<span class="dv">50</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, color <span class="op">=</span> <span class="st">"gray"</span>)</span>
+<span id="cb30-108"><a href="#cb30-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-109"><a href="#cb30-109" aria-hidden="true" tabindex="-1"></a><span class="co"># Special background for pandemic portion</span></span>
+<span id="cb30-110"><a href="#cb30-110" aria-hidden="true" tabindex="-1"></a>ax2.axvspan(</span>
+<span id="cb30-111"><a href="#cb30-111" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2020-01"</span>,</span>
+<span id="cb30-112"><a href="#cb30-112" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2021-05-25"</span>,</span>
+<span id="cb30-113"><a href="#cb30-113" aria-hidden="true" tabindex="-1"></a>    facecolor <span class="op">=</span> c_dark_gray,</span>
+<span id="cb30-114"><a href="#cb30-114" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb30-115"><a href="#cb30-115" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-116"><a href="#cb30-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-117"><a href="#cb30-117" aria-hidden="true" tabindex="-1"></a><span class="co"># Text in lower subplot</span></span>
+<span id="cb30-118"><a href="#cb30-118" aria-hidden="true" tabindex="-1"></a>ax2.text(</span>
+<span id="cb30-119"><a href="#cb30-119" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> dt.date(year <span class="op">=</span> <span class="dv">2021</span>, month <span class="op">=</span> <span class="dv">1</span>, day <span class="op">=</span> <span class="dv">1</span>),</span>
+<span id="cb30-120"><a href="#cb30-120" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">49.25</span>,</span>
+<span id="cb30-121"><a href="#cb30-121" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"Rate drops down to 48</span><span class="ch">\n</span><span class="st">in May 2021"</span>,</span>
+<span id="cb30-122"><a href="#cb30-122" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span id="cb30-123"><a href="#cb30-123" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">11</span>,</span>
+<span id="cb30-124"><a href="#cb30-124" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-125"><a href="#cb30-125" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-126"><a href="#cb30-126" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-127"><a href="#cb30-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-128"><a href="#cb30-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-129"><a href="#cb30-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-130"><a href="#cb30-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-131"><a href="#cb30-131" aria-hidden="true" tabindex="-1"></a><span class="co"># ---FIGURE level customization</span></span>
+<span id="cb30-132"><a href="#cb30-132" aria-hidden="true" tabindex="-1"></a><span class="co"># Add space between the subplots</span></span>
+<span id="cb30-133"><a href="#cb30-133" aria-hidden="true" tabindex="-1"></a>fig.tight_layout(pad <span class="op">=</span> <span class="dv">5</span>)</span>
+<span id="cb30-134"><a href="#cb30-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-135"><a href="#cb30-135" aria-hidden="true" tabindex="-1"></a><span class="co"># Line connection between pandemic parts</span></span>
+<span id="cb30-136"><a href="#cb30-136" aria-hidden="true" tabindex="-1"></a>fig.add_artist( </span>
+<span id="cb30-137"><a href="#cb30-137" aria-hidden="true" tabindex="-1"></a>    lines.Line2D(</span>
+<span id="cb30-138"><a href="#cb30-138" aria-hidden="true" tabindex="-1"></a>        xdata <span class="op">=</span> [<span class="fl">0.82</span>, <span class="fl">0.82</span>],</span>
+<span id="cb30-139"><a href="#cb30-139" aria-hidden="true" tabindex="-1"></a>        ydata <span class="op">=</span> [<span class="fl">0.44</span>, <span class="fl">0.585</span>],</span>
+<span id="cb30-140"><a href="#cb30-140" aria-hidden="true" tabindex="-1"></a>        color <span class="op">=</span> c_dark_gray,</span>
+<span id="cb30-141"><a href="#cb30-141" aria-hidden="true" tabindex="-1"></a>        alpha <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb30-142"><a href="#cb30-142" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb30-143"><a href="#cb30-143" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-144"><a href="#cb30-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-145"><a href="#cb30-145" aria-hidden="true" tabindex="-1"></a><span class="co"># Title with statistic</span></span>
+<span id="cb30-146"><a href="#cb30-146" aria-hidden="true" tabindex="-1"></a>fig.text(</span>
+<span id="cb30-147"><a href="#cb30-147" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb30-148"><a href="#cb30-148" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span id="cb30-149"><a href="#cb30-149" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"USD-PHP Rate Drops to 48 after 1 Year in the Pandemic"</span>,</span>
+<span id="cb30-150"><a href="#cb30-150" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">16</span>,</span>
+<span id="cb30-151"><a href="#cb30-151" aria-hidden="true" tabindex="-1"></a>    weight <span class="op">=</span> <span class="st">"bold"</span>,</span>
+<span id="cb30-152"><a href="#cb30-152" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-153"><a href="#cb30-153" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-154"><a href="#cb30-154" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-155"><a href="#cb30-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-156"><a href="#cb30-156" aria-hidden="true" tabindex="-1"></a><span class="co"># Subtitle</span></span>
+<span id="cb30-157"><a href="#cb30-157" aria-hidden="true" tabindex="-1"></a>fig.text(</span>
+<span id="cb30-158"><a href="#cb30-158" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb30-159"><a href="#cb30-159" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">0.92</span>,</span>
+<span id="cb30-160"><a href="#cb30-160" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"USD-PHP exchange rate over time"</span>,</span>
+<span id="cb30-161"><a href="#cb30-161" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">12</span>,</span>
+<span id="cb30-162"><a href="#cb30-162" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-163"><a href="#cb30-163" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-164"><a href="#cb30-164" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-165"><a href="#cb30-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-166"><a href="#cb30-166" aria-hidden="true" tabindex="-1"></a><span class="co"># "COVID-19" label between subplots</span></span>
+<span id="cb30-167"><a href="#cb30-167" aria-hidden="true" tabindex="-1"></a>fig.text(</span>
+<span id="cb30-168"><a href="#cb30-168" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb30-169"><a href="#cb30-169" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb30-170"><a href="#cb30-170" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="st">"COVID-19 Pandemic"</span>,</span>
+<span id="cb30-171"><a href="#cb30-171" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"gray"</span>,</span>
+<span id="cb30-172"><a href="#cb30-172" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">14</span>,</span>
+<span id="cb30-173"><a href="#cb30-173" aria-hidden="true" tabindex="-1"></a>    ha <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span id="cb30-174"><a href="#cb30-174" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> <span class="st">"center"</span>,</span>
+<span id="cb30-175"><a href="#cb30-175" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-176"><a href="#cb30-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-177"><a href="#cb30-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-178"><a href="#cb30-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-179"><a href="#cb30-179" aria-hidden="true" tabindex="-1"></a><span class="co"># Save chart locally.</span></span>
+<span id="cb30-180"><a href="#cb30-180" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"./private/2021-05-28-MEC-Files/2021-05-28-explanatory-chart.png"</span>)</span>
+<span id="cb30-181"><a href="#cb30-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-182"><a href="#cb30-182" aria-hidden="true" tabindex="-1"></a><span class="co"># Show chart</span></span>
+<span id="cb30-183"><a href="#cb30-183" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="2021-05-28-Making-Explanatory-Chart-USD-PHP-Exchange-Rates_files/figure-html/cell-28-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>In this project, we cleaned and explored data about USD-PHP exchange rates over time.</p>
+<p>We then discussed several key concepts in the creation of an explanatory chart, such as Familiarity, Data-Ink Ratio, and Gestalt Psychology. These concepts were applied throughout the process of making an explanatory chart that compared exchange rate trends before and during the pandemic.</p>
+<p>We were ultimately able to create a chart that is simple and clean, yet eye-catching and informative.</p>
+<p>Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

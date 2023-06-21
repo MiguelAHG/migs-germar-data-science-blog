@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Migs Germar">
+<meta name="dcterms.date" content="2021-12-14">
+<meta name="description" content="I code a multinomial naive bayes algorithm, step-by-step, in order to identify messages as spam or non-spam. I then test the model and evaluate it using various metrics of model performance.">
+
+<title>Migs Germar’s Data Science Blog - Naive Bayes Algorithm for Detecting Spam Messages</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../posts/images/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Migs Germar’s Data Science Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MiguelAHG" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/migs-germar/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.facebook.com/miguelantonio.germar" rel="" target=""><i class="bi bi-facebook" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Naive Bayes Algorithm for Detecting Spam Messages</h1>
+                  <div>
+        <div class="description">
+          I code a multinomial naive bayes algorithm, step-by-step, in order to identify messages as spam or non-spam. I then test the model and evaluate it using various metrics of model performance.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">matplotlib</div>
+                <div class="quarto-category">scikit-learn</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Migs Germar </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 14, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#packages" id="toc-packages" class="nav-link" data-scroll-target="#packages">Packages</a></li>
+  <li><a href="#the-dataset" id="toc-the-dataset" class="nav-link" data-scroll-target="#the-dataset">The Dataset</a></li>
+  <li><a href="#training-and-testing-sets" id="toc-training-and-testing-sets" class="nav-link" data-scroll-target="#training-and-testing-sets">Training and Testing Sets</a></li>
+  <li><a href="#the-algorithm" id="toc-the-algorithm" class="nav-link" data-scroll-target="#the-algorithm">The Algorithm</a>
+  <ul class="collapse">
+  <li><a href="#main-formulas" id="toc-main-formulas" class="nav-link" data-scroll-target="#main-formulas">Main Formulas</a></li>
+  <li><a href="#additive-smoothing-and-vocabulary" id="toc-additive-smoothing-and-vocabulary" class="nav-link" data-scroll-target="#additive-smoothing-and-vocabulary">Additive Smoothing and Vocabulary</a></li>
+  </ul></li>
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation">Implementation</a>
+  <ul class="collapse">
+  <li><a href="#model-parameters" id="toc-model-parameters" class="nav-link" data-scroll-target="#model-parameters">Model Parameters</a>
+  <ul class="collapse">
+  <li><a href="#p_spam-p_ham" id="toc-p_spam-p_ham" class="nav-link" data-scroll-target="#p_spam-p_ham"><span class="math inline">\(P_{Spam}, P_{Ham}\)</span></a></li>
+  <li><a href="#message-preprocessing" id="toc-message-preprocessing" class="nav-link" data-scroll-target="#message-preprocessing">Message Preprocessing</a></li>
+  <li><a href="#vocabulary" id="toc-vocabulary" class="nav-link" data-scroll-target="#vocabulary">Vocabulary</a></li>
+  <li><a href="#n_spam-n_ham" id="toc-n_spam-n_ham" class="nav-link" data-scroll-target="#n_spam-n_ham"><span class="math inline">\(N_{Spam}, N_{Ham}\)</span></a></li>
+  <li><a href="#n_w_ispam-n_w_iham" id="toc-n_w_ispam-n_w_iham" class="nav-link" data-scroll-target="#n_w_ispam-n_w_iham"><span class="math inline">\(N_{w_i|Spam}, N_{w_i|Ham}\)</span></a></li>
+  </ul></li>
+  <li><a href="#predictive-function" id="toc-predictive-function" class="nav-link" data-scroll-target="#predictive-function">Predictive Function</a></li>
+  <li><a href="#model-evaluation" id="toc-model-evaluation" class="nav-link" data-scroll-target="#model-evaluation">Model Evaluation</a>
+  <ul class="collapse">
+  <li><a href="#accuracy" id="toc-accuracy" class="nav-link" data-scroll-target="#accuracy">Accuracy</a></li>
+  <li><a href="#confusion-matrix" id="toc-confusion-matrix" class="nav-link" data-scroll-target="#confusion-matrix">Confusion Matrix</a></li>
+  <li><a href="#recall-precision-f1" id="toc-recall-precision-f1" class="nav-link" data-scroll-target="#recall-precision-f1">Recall, Precision, F1</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#scikit-learn-classes-for-naive-bayes" id="toc-scikit-learn-classes-for-naive-bayes" class="nav-link" data-scroll-target="#scikit-learn-classes-for-naive-bayes">scikit-learn Classes for Naive Bayes</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">Bibliography</a>
+  <ul class="collapse">
+  <li><a href="#data-source" id="toc-data-source" class="nav-link" data-scroll-target="#data-source">Data Source</a></li>
+  <li><a href="#information-sources" id="toc-information-sources" class="nav-link" data-scroll-target="#information-sources">Information Sources</a></li>
+  <li><a href="#image-source" id="toc-image-source" class="nav-link" data-scroll-target="#image-source">Image Source</a></li>
+  </ul></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/spam-unsplash-hannes_johnson.jpg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<center>
+<a href="https://unsplash.com/photos/mRgffV3Hc6c">Unsplash | Hannes Johnson</a>
+</center>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The Multinomial Naive Bayes Algorithm is a machine learning algorithm based on the Bayes Theorem. It calculates the probability that an event <span class="math inline">\(B\)</span> occurred given that event <span class="math inline">\(A\)</span> occurred. Thus, it is usually used in classification problems. (Vadapalli, 2021)</p>
+<p>In this project, we will use the algorithm to determine the probability that a message is spam given its contents. We will then use this probability to decide whether to treat new messages as spam or not. For example, if the probability of being spam is over 50%, then we may treat the message as spam.</p>
+<p>Identifying spam is important in the Philippines because phishing campaigns went up by 200% after the pandemic began (Devanesan, 2020), and a telecommunications provider recently had to block around 71 million spam messages (Yap, 2021). Such messages may attempt to steal personal information, steal money from an account, or install malware (FTC, 2020). Thus, machine learning can be a very helpful tool in preventing such harm from occurring.</p>
+<p>Though the algorithm can be easily implemented using existing functions such as those in the <a href="https://scikit-learn.org/stable/modules/naive_bayes.html#multinomial-naive-bayes">scikit-learn package</a>, I will manually code the algorithm step-by-step in order to explain the mathematical intuition behind it.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I wrote this notebook by following a guided project on the <a href="https://www.dataquest.io/">Dataquest</a> platform, specifically the <a href="https://app.dataquest.io/c/74/m/433/guided-project%3A-building-a-spam-filter-with-naive-bayes/1/exploring-the-dataset">Guided Project: Building a Spam Filter with Naive Bayes</a> The general project flow came from Dataquest. The mathematical explanations are also based on what I learned from Dataquest.</p>
+</div>
+</div>
+</section>
+<section id="packages" class="level1">
+<h1>Packages</h1>
+<p>Below are the packages necessary for this project.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix, ConfusionMatrixDisplay</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-dataset" class="level1">
+<h1>The Dataset</h1>
+<p>We will use the SMS Spam Collection Dataset by Almeida and Hidalgo in 2012. It can be downloaded from the <a href="https://archive.ics.uci.edu/ml/datasets/sms+spam+collection">UCI Machine Learning Repository</a>.</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sms_df <span class="op">=</span> pd.read_csv(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"./private/Naive-Bayes-Files/SMSSpamCollection"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Tab-separated</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    sep <span class="op">=</span> <span class="st">"</span><span class="ch">\t</span><span class="st">"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    header <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    names <span class="op">=</span> [<span class="st">"label"</span>, <span class="st">"sms"</span>]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>sms_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 5572 entries, 0 to 5571
+Data columns (total 2 columns):
+ #   Column  Non-Null Count  Dtype 
+---  ------  --------------  ----- 
+ 0   label   5572 non-null   object
+ 1   sms     5572 non-null   object
+dtypes: object(2)
+memory usage: 87.2+ KB</code></pre>
+</div>
+</div>
+<p>The dataset has 2 columns and 5572 rows.</p>
+<ul>
+<li>The <code>label</code> column contains “ham” if the message is legitimate, or “spam” if it is spam.</li>
+<li>The <code>sms</code> column contains individual SMS messages.</li>
+</ul>
+<p>For example, below are the first 5 rows of the dataset.</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sms_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">label</th>
+<th data-quarto-table-cell-role="th">sms</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>ham</td>
+<td>Go until jurong point, crazy.. Available only ...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>ham</td>
+<td>Ok lar... Joking wif u oni...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>spam</td>
+<td>Free entry in 2 a wkly comp to win FA Cup fina...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>ham</td>
+<td>U dun say so early hor... U c already then say...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>ham</td>
+<td>Nah I don't think he goes to usf, he lives aro...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="training-and-testing-sets" class="level1">
+<h1>Training and Testing Sets</h1>
+<p>The messages will be split into two sets. The training set, comprising 80% of the total data, will be used to train the Naive Bayes Algorithm. The testing set, with 20% of the total data, will be used to test the model’s accuracy.</p>
+<p>First, however, let us calculate what percentage of the messages in the dataset are spam.</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>spam_perc <span class="op">=</span> sms_df[<span class="st">"label"</span>].eq(<span class="st">"spam"</span>).<span class="bu">sum</span>() <span class="op">/</span> sms_df.shape[<span class="dv">0</span>] <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Percentage of spam messages: </span><span class="sc">{</span>spam_perc<span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Percentage of spam messages: 13.41%</code></pre>
+</div>
+</div>
+<p>Only 13% of the messages are spam. Therefore, spam and non-spam messages are not equally represented in this dataset, and this may be problematic. However, this is all the data we have, so the best we can do is to ensure that both the training and testing sets have around 13% of their messages as spam.</p>
+<p>This is an example of <em>proportionate stratified sampling</em> (Thomas, 2020). We first separate the data into two strata (spam and non-spam). We then take 80% of the messages from each strata as the training set. The remaining 20% of each strata is set aside for the testing set. Thus, each of the two sets will contain around 13% spam.</p>
+<p>This has been done with the code below.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: I could have used `train_test_split` from sklearn, but I coded this manually for the sake of grasping the logic.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>split_lists <span class="op">=</span> {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"training"</span>: [],</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"testing"</span>: [],</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Stratify the dataset</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label <span class="kw">in</span> <span class="st">"spam"</span>, <span class="st">"ham"</span>:</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    stratum <span class="op">=</span> sms_df.loc[sms_df[<span class="st">"label"</span>] <span class="op">==</span> label]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    train_part <span class="op">=</span> stratum.sample(</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Sample 80% of the data points</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        frac <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        random_state <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The other 20% that were not sampled go to the testing set.</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    test_part <span class="op">=</span> stratum.loc[<span class="op">~</span>stratum.index.isin(train_part.index)]</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    split_lists[<span class="st">"training"</span>].append(train_part)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    split_lists[<span class="st">"testing"</span>].append(test_part)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>split_dfs <span class="op">=</span> pd.Series(dtype <span class="op">=</span> <span class="st">"object"</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key <span class="kw">in</span> split_lists:</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Concatenate spam and non-spam parts into one DataFrame.</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    set_df <span class="op">=</span> pd.concat(split_lists[key]).reset_index()</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    split_dfs[key] <span class="op">=</span> set_df</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    perc_spam <span class="op">=</span> set_df.label.eq(<span class="st">'spam'</span>).<span class="bu">sum</span>() <span class="op">/</span> set_df.shape[<span class="dv">0</span>] <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Number of rows in </span><span class="sc">{</span>key<span class="sc">}</span><span class="ss"> set: </span><span class="sc">{</span>set_df<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Percentage of </span><span class="sc">{</span>key<span class="sc">}</span><span class="ss"> messages that are spam: </span><span class="sc">{</span>perc_spam<span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of rows in training set: 4458
+Percentage of training messages that are spam: 13.41%
+Number of rows in testing set: 1114
+Percentage of testing messages that are spam: 13.38%</code></pre>
+</div>
+</div>
+<p>We can see that the percentage of spam messages is roughly the same between the two sets. This will help the accuracy of the model later on.</p>
+<p>Now, the two sets will be further split into <code>X</code> and <code>y</code>. <code>y</code> refers to the <strong>target</strong>, or the variable that we are trying to predict. In this case, we are trying to predict whether a message is spam or non-spam, so the “label” column is the target:</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sms_df.label.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>0     ham
+1     ham
+2    spam
+3     ham
+4     ham
+Name: label, dtype: object</code></pre>
+</div>
+</div>
+<p>On the other hand, <code>X</code> refers to the <strong>features</strong>, which are information used to predict the target. We only have one feature column as of now, which is the “sms” column.</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sms_df.sms.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>0    Go until jurong point, crazy.. Available only ...
+1                        Ok lar... Joking wif u oni...
+2    Free entry in 2 a wkly comp to win FA Cup fina...
+3    U dun say so early hor... U c already then say...
+4    Nah I don't think he goes to usf, he lives aro...
+Name: sms, dtype: object</code></pre>
+</div>
+</div>
+<p>Thus, we end up with four final objects:</p>
+<ul>
+<li><code>X_train</code>: The messages in the training data.</li>
+<li><code>X_test</code>: The messages in the testing data.</li>
+<li><code>y_train</code>: The labels in the training data. These correspond to <code>X_train</code>.</li>
+<li><code>y_test</code>: The labels in the testing data. These correspond to <code>X_test</code>.</li>
+</ul>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The four objects listed above.</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> split_dfs.training[[<span class="st">"sms"</span>]].copy()</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> split_dfs.testing[[<span class="st">"sms"</span>]].copy()</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> split_dfs.training[<span class="st">"label"</span>].copy()</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> split_dfs.testing[<span class="st">"label"</span>].copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="the-algorithm" class="level1">
+<h1>The Algorithm</h1>
+<p>Now, let’s discuss the multinomial naive bayes algorithm. Conditional probability is necessary in order to understand it. For our use case, let <span class="math inline">\(Spam\)</span> be the event that a message is spam, and <span class="math inline">\(Ham\)</span> be the event for non-spam.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The mathematical explanations below are not my own ideas. I learned these from the Dataquest course on Naive Bayes.</p>
+</div>
+</div>
+<section id="main-formulas" class="level2">
+<h2 class="anchored" data-anchor-id="main-formulas">Main Formulas</h2>
+<p>We want to compare the probability that a given message is spam to the probability that it is ham. Thus, we use the following formulas:</p>
+<p><span class="math inline">\(P(Spam|w_1, w_2, \dots , w_n) \propto P(Spam) \cdot \Pi_{i=1}^n P(w_i|Spam)\)</span></p>
+<p><span class="math inline">\(P(Ham|w_1, w_2, \dots , w_n) \propto P(Ham) \cdot \Pi_{i=1}^n P(w_i|Ham)\)</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>These formulas are not the same as the Bayes Theorem. To understand how these were derived from the Bayes Theorem, see the Appendix of this post.</p>
+</div>
+</div>
+<p>These two formulas are identical except for the <span class="math inline">\(Spam\)</span> or <span class="math inline">\(Ham\)</span> event. Let us just look at the first equation to unpack it.</p>
+<p>The probability of event <span class="math inline">\(B\)</span> given that event <span class="math inline">\(A\)</span> has happened can be represented as <span class="math inline">\(P(B|A)\)</span> (“probability of B given A”). Thus, the left side of the formula, <span class="math inline">\(P(Spam|w_1, w_2, \dots , w_n)\)</span>, represents the probability of spam given the contents of a message. Each variable <span class="math inline">\(w_i\)</span> represents one word in the message. For example, <span class="math inline">\(w_1\)</span> is the first word in the message, and so on.</p>
+<p>In the middle, the “directly proportional to” sign (<span class="math inline">\(\propto\)</span>) is used instead of the equals sign. The left and right sides are not equal, but one increases as the other increases.</p>
+<p>At the right side, <span class="math inline">\(P(Spam)\)</span> simply refers to the probability that any message is spam. It can be calculated as the number of spam messages in the dataset over the total number of messages.</p>
+<p>Finally, the formula ends with <span class="math inline">\(\Pi_{i=1}^n P(w_i|Spam)\)</span>. The <span class="math inline">\(P(w_i|Spam)\)</span> part refers to the probability of a certain word occurring given that the message is known to be spam. We must calculate this probability for each word in the message. Then, because the uppercase pi (<span class="math inline">\(\Pi\)</span>) refers to a product, we must multiply the word probabilities together.</p>
+</section>
+<section id="additive-smoothing-and-vocabulary" class="level2">
+<h2 class="anchored" data-anchor-id="additive-smoothing-and-vocabulary">Additive Smoothing and Vocabulary</h2>
+<p>In order to calculate <span class="math inline">\(P(w_i|Spam)\)</span>, we need to use the following formula:</p>
+<p><span class="math inline">\(P(w_i | Spam) = \frac{N_{w_i | Spam} + \alpha}{N_{Spam} + \alpha \cdot N_{Vocabulary}}\)</span></p>
+<p>We use an almost identical equation for <span class="math inline">\(P(w_i|Ham)\)</span> as well:</p>
+<p><span class="math inline">\(P(w_i | Ham) = \frac{N_{w_i | Ham} + \alpha}{N_{Ham} + \alpha \cdot N_{Vocabulary}}\)</span></p>
+<p>Again, let us just unpack the first formula. <span class="math inline">\(N_{w_i|Spam}\)</span> refers to the number of times that the word appears in the dataset’s spam messages.</p>
+<p><span class="math inline">\(\alpha\)</span> is the <strong>additive smoothing parameter</strong>. We will use <span class="math inline">\(\alpha = 1\)</span>. This is added to the numerator to prevent it from becoming zero. If it does become zero, the entire product in the main formula will become zero.</p>
+<p><span class="math inline">\(N_{Spam}\)</span> refers to the total number of words in all of the spam messages. Duplicate words are not removed when this is calculated.</p>
+<p>Lastly, <span class="math inline">\(N_{Vocabulary}\)</span> refers to the number of words in the <strong>vocabulary</strong>. This is the set of all <em>unique</em> words found in any of the messages, whether spam or non-spam. Duplicates are removed.</p>
+</section>
+</section>
+<section id="implementation" class="level1">
+<h1>Implementation</h1>
+<p>Based on the theory behind the algorithm, I have written a set of steps to implement it. I will use these steps as the pseudocode for this project.</p>
+<ol type="1">
+<li>Determine the model <strong>parameters</strong>. These are the variables in the formulas shown earlier. Only the training data will be used for this.
+<ul>
+<li>Find <span class="math inline">\(P(Spam), P(Ham)\)</span>.
+<ul>
+<li>Divide the number of spam messages by the total number of messages.</li>
+<li>Do the same for ham messages.</li>
+</ul></li>
+<li>Preprocess the messages to focus on individual words.
+<ul>
+<li>Make all words lowercase.</li>
+<li>Remove punctuation marks.</li>
+</ul></li>
+<li>Form a vocabulary.
+<ul>
+<li>Make a set of all the words in the messages, without duplicates.</li>
+<li><span class="math inline">\(N_{Vocabulary}\)</span> is the number of words in this set.</li>
+</ul></li>
+<li>Find <span class="math inline">\(N_{Spam}, N_{Ham}\)</span>.
+<ul>
+<li>Count the number of times each word appears in each message.</li>
+<li>Count the total number of words in spam messages. Do the same for ham messages.</li>
+</ul></li>
+<li>Find <span class="math inline">\(N_{w_i|Spam}, N_{w_i|Ham}\)</span> for each word in the vocabulary.
+<ul>
+<li>Sum up the word counts in spam messages to get <span class="math inline">\(N_{w_i|Spam}\)</span>.</li>
+<li>Do the same for ham messages to get <span class="math inline">\(N_{w_i|Spam}\)</span>.</li>
+</ul></li>
+</ul></li>
+<li>Write a <strong>predictive function</strong>. This takes a new message and predicts whether it is spam or not.
+<ul>
+<li>Plug the values that we calculated previously into the equation.</li>
+<li>Return <span class="math inline">\(P(Spam|w_1, w_2, \dots , w_n)\)</span>, <span class="math inline">\(P(Ham|w_1, w_2, \dots , w_n)\)</span>, and the prediction (“spam” or “ham”).</li>
+</ul></li>
+<li><strong>Evaluate</strong> the model using the testing data.
+<ul>
+<li>Make predictions for all messages in the testing set.</li>
+<li>Divide the number of correct predictions by the total number of predictions. This will result in the accuracy of the model.</li>
+</ul></li>
+</ol>
+<section id="model-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="model-parameters">Model Parameters</h2>
+<p>In the first step, we will calculate the parameters of the model, which include the following.</p>
+<ul>
+<li><span class="math inline">\(P(Spam), P(Ham)\)</span></li>
+<li><span class="math inline">\(N_{Vocabulary}\)</span></li>
+<li><span class="math inline">\(N_{Spam}, N_{Ham}\)</span></li>
+<li><span class="math inline">\(N_{w_i|Spam}, N_{w_i|Ham}\)</span></li>
+</ul>
+<p>We will calculate these values first so that we can plug them into the equation later on when we predict whether new messages are spam or non-spam.</p>
+<section id="p_spam-p_ham" class="level3">
+<h3 class="anchored" data-anchor-id="p_spam-p_ham"><span class="math inline">\(P_{Spam}, P_{Ham}\)</span></h3>
+<p>The probability of spam is equal to the number of spam messages over the total number of messages. The same goes for ham messages.</p>
+<div class="cell" data-execution_count="9">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>p_label <span class="op">=</span> {}</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>p_label[<span class="st">"spam"</span>] <span class="op">=</span> y_train.eq(<span class="st">"spam"</span>).<span class="bu">sum</span>() <span class="op">/</span> y_train.shape[<span class="dv">0</span>]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>p_label[<span class="st">"ham"</span>] <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> p_label[<span class="st">"spam"</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(Spam) = </span><span class="sc">{</span>p_label[<span class="st">'spam'</span>] <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(Ham) = </span><span class="sc">{</span>p_label[<span class="st">'ham'</span>] <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(Spam) = 13.41%
+P(Ham) = 86.59%</code></pre>
+</div>
+</div>
+</section>
+<section id="message-preprocessing" class="level3">
+<h3 class="anchored" data-anchor-id="message-preprocessing">Message Preprocessing</h3>
+<p>Below are the messages:</p>
+<div class="cell" data-execution_count="10">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>X_train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">sms</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Marvel Mobile Play the official Ultimate Spide...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Thank you, winner notified by sms. Good Luck! ...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Free msg. Sorry, a service you ordered from 81...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Thanks for your ringtone order, ref number R83...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>PRIVATE! Your 2003 Account Statement for shows...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>In order to get individual words, we make all words lowercase and remove punctuation marks and other non-word characters. We then turn each message into a list of its words.</p>
+<div class="cell" data-execution_count="11">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> preprocess_messages(series):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> (</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        series</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.lower()</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Delete all non-word characters.</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.replace(<span class="vs">r"[^a-z0-9 ]"</span>, <span class="st">""</span>, regex <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.strip()</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.split()</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> pd.DataFrame(preprocess_messages(X_train.sms))</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>X_train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">sms</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>[marvel, mobile, play, the, official, ultimate...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>[thank, you, winner, notified, by, sms, good, ...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>[free, msg, sorry, a, service, you, ordered, f...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>[thanks, for, your, ringtone, order, ref, numb...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>[private, your, 2003, account, statement, for,...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="vocabulary" class="level3">
+<h3 class="anchored" data-anchor-id="vocabulary">Vocabulary</h3>
+<p>Using the preprocessed messages, we can form a set of all of the unique words that they contain.</p>
+<div class="cell" data-execution_count="12">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lst <span class="kw">in</span> X_train.sms:</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    vocab.update(lst)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a Series to delete items that are blank or only contain whitespace.</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>vocab_series <span class="op">=</span> pd.Series(<span class="bu">list</span>(vocab))</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>vocab_series <span class="op">=</span> vocab_series.loc[<span class="op">~</span>vocab_series.<span class="bu">str</span>.match(<span class="st">"^\s*$"</span>)]</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> <span class="bu">set</span>(vocab_series)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>n_vocab <span class="op">=</span> <span class="bu">len</span>(vocab)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of words in the vocabulary: </span><span class="sc">{</span>n_vocab<span class="sc">}</span><span class="ch">\n</span><span class="ss">First few items:"</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(vocab)[:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of words in the vocabulary: 8385
+First few items:</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>['silent',
+ 'receivea',
+ 'dismay',
+ 'noise',
+ 'platt',
+ 'li',
+ 'woohoo',
+ 'ucall',
+ 'wondarfull',
+ '80082']</code></pre>
+</div>
+</div>
+<p>Above are the first 10 items in the vocabulary. In total, <span class="math inline">\(N_{Vocabulary} = 8385\)</span>.</p>
+</section>
+<section id="n_spam-n_ham" class="level3">
+<h3 class="anchored" data-anchor-id="n_spam-n_ham"><span class="math inline">\(N_{Spam}, N_{Ham}\)</span></h3>
+<p>Using the vocabulary, we can transform the messages to show the number of times that each word appears in each message.</p>
+<div class="cell" data-execution_count="25">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> to_word_counts(series, vocab <span class="op">=</span> vocab):</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    vocab_lst <span class="op">=</span> <span class="bu">list</span>(<span class="bu">sorted</span>(vocab))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    word_counts <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        w: [<span class="dv">0</span>] <span class="op">*</span> series.shape[<span class="dv">0</span>]</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> w <span class="kw">in</span> vocab_lst</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index, word_lst <span class="kw">in</span> series.iteritems():</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> w <span class="kw">in</span> word_lst:</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> w <span class="kw">in</span> vocab:</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>                word_counts.loc[index, w] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> word_counts</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>word_counts <span class="op">=</span> to_word_counts(X_train.sms)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>word_counts.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">008704050406</th>
+<th data-quarto-table-cell-role="th">0089my</th>
+<th data-quarto-table-cell-role="th">0121</th>
+<th data-quarto-table-cell-role="th">01223585236</th>
+<th data-quarto-table-cell-role="th">01223585334</th>
+<th data-quarto-table-cell-role="th">0125698789</th>
+<th data-quarto-table-cell-role="th">020603</th>
+<th data-quarto-table-cell-role="th">0207</th>
+<th data-quarto-table-cell-role="th">02070836089</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">zebra</th>
+<th data-quarto-table-cell-role="th">zed</th>
+<th data-quarto-table-cell-role="th">zeros</th>
+<th data-quarto-table-cell-role="th">zhong</th>
+<th data-quarto-table-cell-role="th">zindgi</th>
+<th data-quarto-table-cell-role="th">zoe</th>
+<th data-quarto-table-cell-role="th">zogtorius</th>
+<th data-quarto-table-cell-role="th">zoom</th>
+<th data-quarto-table-cell-role="th">zouk</th>
+<th data-quarto-table-cell-role="th">zyada</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 8385 columns</p>
+</div>
+</div>
+</div>
+<p>In the table above, each row represents a message. Each column represents a unique word in the vocabulary. The cells show the number of times that each word appeared in each message.</p>
+<p>Now, we can calculate <span class="math inline">\(N_{Spam}, N_{Ham}\)</span>:</p>
+<div class="cell" data-execution_count="14">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_n(label, word_counts <span class="op">=</span> word_counts):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    n_label <span class="op">=</span> (</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        word_counts</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        .loc[y_train <span class="op">==</span> label, :]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Sum all of the numbers in the df.</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">sum</span>()</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">sum</span>()</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> n_label</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>n_label <span class="op">=</span> {}</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label <span class="kw">in</span> [<span class="st">"spam"</span>, <span class="st">"ham"</span>]:</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    n_label[label] <span class="op">=</span> count_n(label)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of words in spam messages: </span><span class="sc">{</span>n_label[<span class="st">'spam'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of words in ham messages: </span><span class="sc">{</span>n_label[<span class="st">'ham'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of words in spam messages: 14037
+Number of words in ham messages: 53977</code></pre>
+</div>
+</div>
+<p>The result is that <span class="math inline">\(N_{Spam} = 14037\)</span> and <span class="math inline">\(N_{Ham} = 53977\)</span>.</p>
+</section>
+<section id="n_w_ispam-n_w_iham" class="level3">
+<h3 class="anchored" data-anchor-id="n_w_ispam-n_w_iham"><span class="math inline">\(N_{w_i|Spam}, N_{w_i|Ham}\)</span></h3>
+<p>Finally, we can use the word counts to determine these two parameters. Recall that <span class="math inline">\(N_{w_i|Spam}\)</span> is the number of times that a certain word <span class="math inline">\(w_i\)</span> appeared in the spam messages.</p>
+<div class="cell" data-execution_count="15">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>full_train <span class="op">=</span> pd.concat(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    [y_train, word_counts],</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    axis <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>n_word_given_label <span class="op">=</span> full_train.pivot_table(</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> vocab_lst,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    index <span class="op">=</span> <span class="st">"label"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    aggfunc <span class="op">=</span> np.<span class="bu">sum</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>n_word_given_label</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">008704050406</th>
+<th data-quarto-table-cell-role="th">0089my</th>
+<th data-quarto-table-cell-role="th">0121</th>
+<th data-quarto-table-cell-role="th">01223585236</th>
+<th data-quarto-table-cell-role="th">01223585334</th>
+<th data-quarto-table-cell-role="th">0125698789</th>
+<th data-quarto-table-cell-role="th">020603</th>
+<th data-quarto-table-cell-role="th">0207</th>
+<th data-quarto-table-cell-role="th">02070836089</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">zebra</th>
+<th data-quarto-table-cell-role="th">zed</th>
+<th data-quarto-table-cell-role="th">zeros</th>
+<th data-quarto-table-cell-role="th">zhong</th>
+<th data-quarto-table-cell-role="th">zindgi</th>
+<th data-quarto-table-cell-role="th">zoe</th>
+<th data-quarto-table-cell-role="th">zogtorius</th>
+<th data-quarto-table-cell-role="th">zoom</th>
+<th data-quarto-table-cell-role="th">zouk</th>
+<th data-quarto-table-cell-role="th">zyada</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">label</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">ham</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">spam</td>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+<td>...</td>
+<td>1</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+<p>2 rows × 8385 columns</p>
+</div>
+</div>
+</div>
+<p>The table above can be used to access these parameters. For example, if we want to access <span class="math inline">\(N_{w_i | Spam}\)</span> for the word “hello”, we can look at the value where the “spam” row and “hello” column intersect. The value is the number of times that “hello” appeared in the spam messages.</p>
+<div class="cell" data-execution_count="16">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>n_hello_spam <span class="op">=</span> n_word_given_label.at[<span class="st">"spam"</span>, <span class="st">"hello"</span>]</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of times that 'hello' appeared in spam messages: </span><span class="sc">{</span>n_hello_spam<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of times that 'hello' appeared in spam messages: 3</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="predictive-function" class="level2">
+<h2 class="anchored" data-anchor-id="predictive-function">Predictive Function</h2>
+<p>Now that all of the parameters have been found, we can write a function that will take a new message and classify it as spam or non-spam. This function will use the formulas explained earlier.</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> predict(word_lst, out <span class="op">=</span> <span class="st">"both"</span>, alpha <span class="op">=</span> <span class="dv">1</span>, vocab <span class="op">=</span> vocab, p_label <span class="op">=</span> p_label, n_label <span class="op">=</span> n_label, n_word_given_label <span class="op">=</span> n_word_given_label):</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Given the list of words in a message, predict whether it is spam or ham.</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">word_lst: The preprocessed list of words in the message.</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">out: "both" to output both probabilities and prediction in a tuple. "pred" to output only the prediction as a string."""</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set up a Series to store results</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> pd.Series(dtype <span class="op">=</span> np.float64)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label <span class="kw">in</span> [<span class="st">"spam"</span>, <span class="st">"ham"</span>]:</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Use P(Spam) or P(Ham)</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>        final <span class="op">=</span> p_label[label]</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Iterate through words in the message.</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> w <span class="kw">in</span> word_lst:</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Only include a word if it is already in the vocabulary.</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> w <span class="kw">in</span> vocab:</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Calculate P(w1, w2, ..., wn | Spam) using the formula.</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>                p_word_given_label <span class="op">=</span> (</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>                    (n_word_given_label.at[label, w] <span class="op">+</span> alpha)</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>                    <span class="op">/</span> (n_label[label] <span class="op">+</span> alpha <span class="op">*</span> n_vocab)</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Multiply the result into the final value.</span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>                final <span class="op">*=</span> p_word_given_label</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>        results[label] <span class="op">=</span> final</span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The prediction is the label with the higher probability in the Series.</span></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If the probabilities are equal, the prediction is "uncertain"</span></span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> results[<span class="st">"spam"</span>] <span class="op">==</span> results[<span class="st">"ham"</span>]:</span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>        prediction <span class="op">=</span> <span class="st">"uncertain"</span></span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>        prediction <span class="op">=</span> results.idxmax()</span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> out <span class="op">==</span> <span class="st">"both"</span>:</span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> results, prediction</span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> out <span class="op">==</span> <span class="st">"pred"</span>:</span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> prediction</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let us try using this function to predict whether a message is spam or ham. We will use this example: “you won a prize claim it now by sending credit card details”.</p>
+<div class="cell" data-execution_count="18">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>results, prediction <span class="op">=</span> predict(<span class="st">"you won a prize claim it now by sending credit card details"</span>.split())</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Results:"</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, value <span class="kw">in</span> results.iteritems():</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"P(</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss"> | message) is proportional to </span><span class="sc">{</span>value<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"This message is predicted to be </span><span class="sc">{</span>prediction<span class="sc">}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results:
+P(spam | message) is proportional to 2.3208952599406518e-35
+P(ham | message) is proportional to 1.8781562825001382e-41
+This message is predicted to be spam.</code></pre>
+</div>
+</div>
+<p>The algorithm determined that <span class="math inline">\(P(Spam|w_1, w_2, \dots , w_n) \propto 2.32 \cdot 10^{-35}\)</span>, whereas <span class="math inline">\(P(Ham|w_1, w_2, \dots , w_n) \propto 1.88 \cdot 10^{-41}\)</span>. Since the probability for spam was higher, it predicted that the message was spam.</p>
+</section>
+<section id="model-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="model-evaluation">Model Evaluation</h2>
+<p>The final step is to evaluate the predictive function. We will use the function to predict labels for the messages in the testing set. Then, we will show the predicted labels side-by-side with the real labels.</p>
+<div class="cell" data-execution_count="19">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Preprocess testing messages</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>X_test_preprocessed <span class="op">=</span> preprocess_messages(X_test.sms)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Make predictions</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> X_test_preprocessed.<span class="bu">apply</span>(predict, out <span class="op">=</span> <span class="st">"pred"</span>)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>y_pred.name <span class="op">=</span> <span class="st">"prediction"</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Concatenate</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>full_test <span class="op">=</span> pd.concat(</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    [y_test, y_pred, X_test],</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    axis <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>full_test.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">label</th>
+<th data-quarto-table-cell-role="th">prediction</th>
+<th data-quarto-table-cell-role="th">sms</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>spam</td>
+<td>spam</td>
+<td>England v Macedonia - dont miss the goals/team...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>spam</td>
+<td>spam</td>
+<td>SMS. ac Sptv: The New Jersey Devils and the De...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>spam</td>
+<td>spam</td>
+<td>Please call our customer service representativ...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>spam</td>
+<td>spam</td>
+<td>URGENT! Your Mobile No. was awarded £2000 Bonu...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>spam</td>
+<td>spam</td>
+<td>Sunshine Quiz Wkly Q! Win a top Sony DVD playe...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The table above shows the first 5 rows of the testing set. We can see that the algorithm correctly predicted that the first 5 rows were spam.</p>
+<section id="accuracy" class="level3">
+<h3 class="anchored" data-anchor-id="accuracy">Accuracy</h3>
+<p>We will now calculate the overall accuracy of the model by dividing the number of correct predictions by the total number of predictions.</p>
+<div class="cell" data-execution_count="20">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> y_test.eq(y_pred).<span class="bu">sum</span>() <span class="op">/</span> y_pred.shape[<span class="dv">0</span>] <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy: </span><span class="sc">{</span>acc<span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy: 98.74%</code></pre>
+</div>
+</div>
+<p>The model turned out to have a very high accuracy of 98.74%. This shows that it is effective at filtering spam from non-spam.</p>
+<p>However, considering that spam and non-spam did not have equal representation in the data, with only 13% of all messages being spam, the accuracy may be misleading (Vallantin, 2018). For example, if a model is instructed to always predict that a message is ham, it would still have an accuracy of around 87%. Thus, to get a better picture of the performance of the model, we will make a confusion matrix and use other evaluation metrics such as precision, recall, and F1.</p>
+</section>
+<section id="confusion-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="confusion-matrix">Confusion Matrix</h3>
+<p>A confusion matrix is a table that gives insight into how well a model was able to predict labels for datapoints (Brownlee, 2016).</p>
+<div class="cell" data-execution_count="21">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred, labels <span class="op">=</span> [<span class="st">"ham"</span>, <span class="st">"spam"</span>])</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(cm, display_labels <span class="op">=</span> [<span class="st">"ham"</span>, <span class="st">"spam"</span>])</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>disp.plot()</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Confusion Matrix of Results"</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2021-12-14-Naive-Bayes-Algorithm-Detecting-Spam-Messages_files/figure-html/cell-22-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>In this case, we only have two labels (spam and ham), so there are two rows and two columns. The vertical axis refers to the true labels, whereas the horizontal axis refers to the predicted labels.</p>
+<p>For example, if we want to know how many true spam messages were incorrectly predicted to be ham, we can look at the “spam” row and “ham” column. The value is 13, which means that 13 messages were incorrectly predicted in this way.</p>
+<p>If we consider ham messages as “negative” and spam messages as “positive,” then the confusion matrix above shows the True Negatives (TN) in the top left, False Negatives (FN) in the top right, False Positives (FP) in the bottom left, and True Positives (TP) in the bottom right.</p>
+</section>
+<section id="recall-precision-f1" class="level3">
+<h3 class="anchored" data-anchor-id="recall-precision-f1">Recall, Precision, F1</h3>
+<p>Recall, Precision, and F1 are other metrics of model performance which may be useful when the labels are not represented equally in the data. Their equations are shown below; these were taken from Brownlee (2020).</p>
+<p>Recall is the number of true positives divided by the total number of actual positives. It measures the “ability of the classifier to find all the positive samples. (scikit-learn developers, 2021)”</p>
+<p><span class="math inline">\(Recall = \frac{TP}{TP + FN}\)</span></p>
+<p>Precision is the number of true positives divided by the total number of predicted positives. It is the “ability of the classifier not to label as positive a sample that is negative” (scikit-learn developers, 2021). In other words, it is the ability of the model to avoid Type I error (Bhandari, 2021).</p>
+<p><span class="math inline">\(Precision = \frac{TP}{TP+FP}\)</span></p>
+<p>Finally, <span class="math inline">\(F_{\beta}\)</span> is the “weighted harmonic mean of the precision and recall,” and <span class="math inline">\(F_1\)</span> is the version where both of these factors are given equal importance (scikit-learn developers, 2021).</p>
+<p><span class="math inline">\(F1 = \frac{2 TP}{2 TP + FP + FN}\)</span></p>
+<p>Let us calculate these metrics for the spam filter using the confusion matrix.</p>
+<div class="cell" data-execution_count="22">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>tp <span class="op">=</span> <span class="dv">136</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>tn <span class="op">=</span> <span class="dv">964</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>fp <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>fn <span class="op">=</span> <span class="dv">13</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>metrics <span class="op">=</span> {}</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>metrics[<span class="st">"recall"</span>] <span class="op">=</span> tp <span class="op">/</span> (tp <span class="op">+</span> fn)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>metrics[<span class="st">"precision"</span>] <span class="op">=</span> tp <span class="op">/</span> (tp <span class="op">+</span> fp)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>metrics[<span class="st">"f1"</span>] <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> tp <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> tp <span class="op">+</span> fp <span class="op">+</span> fn)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key <span class="kw">in</span> metrics:</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>key<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>metrics[key] <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>recall: 91.28%
+precision: 99.27%
+f1: 95.10%</code></pre>
+</div>
+</div>
+<p>All three metrics are above 90%. In particular, precision is 99.27%, which means that the model is very good at avoiding labelling ham messages as spam.</p>
+<p>Therefore, we can say that the naive bayes algorithm performs very well with the data that it was given.</p>
+</section>
+</section>
+</section>
+<section id="scikit-learn-classes-for-naive-bayes" class="level1">
+<h1>scikit-learn Classes for Naive Bayes</h1>
+<p>In practice, a data scientist would not code the entire algorithm each time they use it, since this is time-consuming. Instead, one can use prepackaged classes in scikit-learn.</p>
+<p>For the purpose of classifying spam based on word counts, we can apply the following classes, according to the scikit-learn developers (2021):</p>
+<ul>
+<li><code>MultinomialNB</code>: This uses the same logic as the algorithm explained earlier.</li>
+<li><code>GaussianNB</code>: “The likelihood of the features is assumed to be Gaussian,” so the mean and standard deviation of each features is considered.</li>
+<li><code>ComplementNB</code>: It is an “adaptation of the standard multinomial naive Bayes (MNB) algorithm that is particularly suited for imbalanced data sets.” This may be useful for our dataset because the percentages of spam and non-spam messages are imbalanced.</li>
+</ul>
+<p>Other classes which will not be used in this project include <code>BernoulliNB</code>, which assumes each feature to be binary (only two categories), and <code>CategoricalNB</code>, which assumes that each feature is categorical rather than numeric.</p>
+<p>Let us try using the first three classes and comparing them. We will also use functions from <code>sklearn.metrics</code> to calculate accuracy score and the other metrics.</p>
+<div class="cell" data-execution_count="31">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.naive_bayes <span class="im">import</span> MultinomialNB, GaussianNB, ComplementNB</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score, precision_score, recall_score, f1_score</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>nb_classes <span class="op">=</span> {</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Multinomial"</span>: MultinomialNB,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Gaussian"</span>: GaussianNB,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Complement"</span>: ComplementNB,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>metric_funcs <span class="op">=</span> {</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Accuracy"</span>: accuracy_score,</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Precision"</span>: precision_score,</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Recall"</span>: recall_score,</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"F1"</span>: f1_score,</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>result_rows <span class="op">=</span> []</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>test_word_counts <span class="op">=</span> to_word_counts(X_test_preprocessed)</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> class_name <span class="kw">in</span> nb_classes:</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    nb <span class="op">=</span> nb_classes[class_name]</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> nb()</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>    model.fit(</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>        word_counts,</span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>        y_train,</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> model.predict(test_word_counts)</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    metric_results <span class="op">=</span> pd.Series(name <span class="op">=</span> class_name, dtype <span class="op">=</span> <span class="st">"float64"</span>)</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> metric_name, score_func <span class="kw">in</span> metric_funcs.items():</span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> metric_name <span class="op">==</span> <span class="st">"Accuracy"</span>:</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>            score <span class="op">=</span> score_func(</span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>                y_true <span class="op">=</span> y_test,</span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>                y_pred <span class="op">=</span> y_pred,</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>            score <span class="op">=</span> score_func(</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>                y_true <span class="op">=</span> y_test,</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>                y_pred <span class="op">=</span> y_pred,</span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>                pos_label <span class="op">=</span> <span class="st">"spam"</span>,</span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a>        metric_results[metric_name] <span class="op">=</span> score <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>    result_rows.append(metric_results)</span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>result_df <span class="op">=</span> pd.DataFrame(result_rows)</span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>result_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="31">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Accuracy</th>
+<th data-quarto-table-cell-role="th">Precision</th>
+<th data-quarto-table-cell-role="th">Recall</th>
+<th data-quarto-table-cell-role="th">F1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Multinomial</td>
+<td>98.743268</td>
+<td>99.270073</td>
+<td>91.275168</td>
+<td>95.104895</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Gaussian</td>
+<td>90.843806</td>
+<td>60.444444</td>
+<td>91.275168</td>
+<td>72.727273</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Complement</td>
+<td>97.396768</td>
+<td>88.461538</td>
+<td>92.617450</td>
+<td>90.491803</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><code>MultinomialNB</code> performed the best, as it had the highest accuracy, precision, and F1 score. Its accuracy was 98.74%, which is the same as the accuracy of the algorithm that I manually coded earlier. Thus, I know that what I coded was correct.</p>
+<p><code>ComplementNB</code> also performed well, though its precision was 88%, meaning that it was more prone to labeling ham messages as spam. However, the <code>GaussianNB</code> class was the worst performing one, as its precision was 60% and its F1 was 73%. This likely occurred because the assumption that the features’ likelihoods were Gaussian did not hold.</p>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>In this project, we obtained a dataset of spam and non-spam messages, used this to calculate the parameters for a multinomial naive bayes algorithm, wrote a function to predict whether a new message is spam or non-spam, evaluated the model using various performance metrics, and tried three variations of the model in scikit-learn.</p>
+<p>Naive bayes is just one of various classification models, such as SVM, logistic regression, random forest, etc. It is useful as most of its calculations are done during the training stage, so it is fast at making predictions. However, it is not perfect, as the assumption that the features are independent usually does not hold true in real life. (Gupta, 2020)</p>
+<p>However, models cannot represent reality perfectly. Simplifications like this are good enough if they are useful in making predictions or testing relationships among variables.</p>
+<p>Another important insight from this project is that accuracy should not be the only metric used to evaluate model performance. We should use other metrics like recall, precision, and F1 score, which provide more nuanced perspectives. Though this was not done for this project, in other scenarios, we may have to adjust the model to favor either recall or precision depending on the specific use case.</p>
+<p>Thanks for reading!</p>
+</section>
+<section id="bibliography" class="level1">
+<h1>Bibliography</h1>
+<section id="data-source" class="level2">
+<h2 class="anchored" data-anchor-id="data-source">Data Source</h2>
+<p>Almeida, T. A., &amp; Hidalgo, J. M. G. (2012, June 22). SMS Spam Collection Data Set. UCI Machine Learning Repository. https://archive.ics.uci.edu/ml/datasets/sms+spam+collection#</p>
+</section>
+<section id="information-sources" class="level2">
+<h2 class="anchored" data-anchor-id="information-sources">Information Sources</h2>
+<p>Bhandari, P. (2021, January 18). Type I and Type II errors. Scribbr. https://www.scribbr.com/statistics/type-i-and-type-ii-errors/</p>
+<p>Brownlee, J. (2016, November 17). What is a Confusion Matrix in Machine Learning. Machine Learning Mastery. https://machinelearningmastery.com/confusion-matrix-machine-learning/</p>
+<p>Brownlee, J. (2020, August 27). How to Calculate Precision, Recall, F1, and More for Deep Learning Models. Machine Learning Mastery. https://machinelearningmastery.com/how-to-calculate-precision-recall-f1-and-more-for-deep-learning-models/</p>
+<p>Dataquest. (n.d.). Guided Project: Building A Spam Filter With Naive Bayes. Dataquest. Retrieved December 14, 2021, from https://www.dataquest.io/c/74/m/433/guided-project%3A-building-a-spam-filter-with-naive-bayes</p>
+<p>Devanesan, J. (2020, August 19). Phishing scams dominate the Philippines cybercrime landscape. Tech Wire Asia. https://techwireasia.com/2020/08/phishing-scams-dominate-the-philippines-cybercrime-landscape/</p>
+<p>FTC CI. (2020, February 19). How To Recognize and Report Spam Text Messages. Federal Trade Commission Consumer Information. https://www.consumer.ftc.gov/articles/how-recognize-and-report-spam-text-messages</p>
+<p>Gupta, S. (2020, February 28). Pros and cons of various Classification ML algorithms. Medium. https://towardsdatascience.com/pros-and-cons-of-various-classification-ml-algorithms-3b5bfb3c87d6</p>
+<p>scikit-learn developers. (2021). 1.9. Naive Bayes. Scikit-Learn. https://scikit-learn/stable/modules/naive_bayes.html</p>
+<p>scikit-learn developers. (2021). 3.3. Metrics and scoring: Quantifying the quality of predictions. Scikit-Learn. https://scikit-learn/stable/modules/model_evaluation.html</p>
+<p>Thomas, L. (2020, September 18). How to use stratified sampling. Scribbr. https://www.scribbr.com/methodology/stratified-sampling/ Vadapalli, P. (2021, January 5). Naive Bayes Explained: Function, Advantages &amp; Disadvantages, Applications in 2021. UpGrad Blog. https://www.upgrad.com/blog/naive-bayes-explained/</p>
+<p>Vallantin, L. (2018, September 6). Why you should not trust only in accuracy to measure machine learning performance. Medium. https://medium.com/<span class="citation" data-cites="limavallantin/why-you-should-not-trust-only-in-accuracy-to-measure-machine-learning-performance-a72cf00b4516">@limavallantin/why-you-should-not-trust-only-in-accuracy-to-measure-machine-learning-performance-a72cf00b4516</span></p>
+<p>Yap, C. (2021, November 25). Millions of spam messages blocked in Philippines as scams surge. Yahoo News. https://ph.news.yahoo.com/millions-of-spam-messages-blocked-in-philippines-as-scams-surge-005658569.html</p>
+</section>
+<section id="image-source" class="level2">
+<h2 class="anchored" data-anchor-id="image-source">Image Source</h2>
+<p>Johnson, H. (2020, February 24). Photo by Hannes Johnson on Unsplash. Unsplash. https://unsplash.com/photos/mRgffV3Hc6c</p>
+</section>
+</section>
+<section id="appendix" class="level1">
+<h1>Appendix</h1>
+<p>Here, I explain how the multinomial naive bayes algorithm was derived from the Bayes Theorem. This was originally placed earlier in the post, but I deemed it to be unnecessary for that part.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The mathematical explanations below are not my own ideas. I learned these from the Dataquest course on Naive Bayes.</p>
+</div>
+</div>
+<p>Given two events <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>, we can use the theorem to determine the probability that <span class="math inline">\(B\)</span> happened given that <span class="math inline">\(A\)</span> happened. This probability is written as <span class="math inline">\(P(B|A)\)</span>.</p>
+<p><span class="math inline">\(P(B|A) = \frac{P(B) \cdot P(A|B)}{\Sigma_{i = 1}^n (P(B_i) \cdot P(A|B_i))}\)</span></p>
+<p>In this case, <span class="math inline">\(B_1\)</span> is the event that the message is non-spam, and <span class="math inline">\(B_2\)</span> is the event that it is spam. <span class="math inline">\(B\)</span> can refer to either <span class="math inline">\(B_1\)</span> or <span class="math inline">\(B_2\)</span>, depending on which probability we want to calculate. Also, <span class="math inline">\(A\)</span> refers to the specific contents of one message.</p>
+<p>In order to make things clearer, let us say that <span class="math inline">\(Spam\)</span> is the event that the message is spam, and <span class="math inline">\(Ham\)</span> is the event that the message is non-spam.</p>
+<p>Then, let us expand event <span class="math inline">\(A\)</span> (the message itself) in order to consider the individual words inside it. For example, the first word in a message can be labeled <span class="math inline">\(w_1\)</span>. If we have a total of <span class="math inline">\(n\)</span> words, then the words can be labeled as <span class="math inline">\(w_1, w_2, \dots , w_n\)</span>.</p>
+<p>Thus, we can rewrite the equation. Here is the probability of a given message being spam:</p>
+<p><span class="math inline">\(P(Spam|w_1, w_2, \dots , w_n) = \frac{P(Spam) \cdot P(w_1, w_2, \dots , w_n|Spam)}{\Sigma_{i = 1}^n (P(B_i) \cdot P(w_1, w_2, \dots , w_n|B_i))}\)</span></p>
+<p>Here is the probability of a given message being non-spam:</p>
+<p><span class="math inline">\(P(Ham|w_1, w_2, \dots , w_n) = \frac{P(Ham) \cdot P(w_1, w_2, \dots , w_n|Ham)}{\Sigma_{i = 1}^n (P(B_i) \cdot P(w_1, w_2, \dots , w_n|B_i))}\)</span></p>
+<p>Notice that the denominators are the same. Since we only want to compare these two probabilities, we can skip calculating the denominator and just calculate the numerators. We can thus rewrite the equation as follows. Note that the <span class="math inline">\(\propto\)</span> symbol is used instead of <span class="math inline">\(=\)</span> because the two quantities are not equal but directly proportional.</p>
+<p><span class="math inline">\(P(Spam|w_1, w_2, \dots , w_n) \propto P(Spam) \cdot P(w_1, w_2, \dots , w_n|Spam)\)</span></p>
+<p>The first factor, <span class="math inline">\(P(Spam)\)</span>, is easy to find, as it is simply the number of spam messages divided by the total number of messages. However, <span class="math inline">\(P(w_1, w_2, \dots , w_n|Spam)\)</span> needs to be further expanded.</p>
+<p>If we make the assumption that the probability of each word is independent of the probability of the other words, we can use the multiplication rule. The assumption of independence is what makes the algorithm “naive,” as it usually doesn’t hold true in reality. However, the algorithm is still useful for predictions despite this.</p>
+<p><span class="math inline">\(P(Spam) \cdot P(w_1, w_2, \dots , w_n|Spam) \\ = P(Spam) \cdot P(w_1 \cap w_2 \cap \dots \cap w_n | Spam) \\ = P(Spam) \cdot P(w_1|Spam) \cdot P(w_2|Spam) \cdot \dots \cdot P(w_n|Spam)\)</span></p>
+<p>Note that we still have to find the probability of each word given <span class="math inline">\(Spam\)</span> because we assume that the presence of each word is dependent on <span class="math inline">\(Spam\)</span>.</p>
+<p>Thus, the final formula is:</p>
+<p><span class="math inline">\(P(Spam|w_1, w_2, \dots , w_n) \propto P(Spam) \cdot \Pi_{i=1}^n P(w_i|Spam)\)</span></p>
+<p>Likewise, the formula for <span class="math inline">\(Ham\)</span> is:</p>
+<p><span class="math inline">\(P(Ham|w_1, w_2, \dots , w_n) \propto P(Ham) \cdot \Pi_{i=1}^n P(w_i|Ham)\)</span></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

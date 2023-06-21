@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Migs Germar">
+<meta name="dcterms.date" content="2021-12-28">
+<meta name="description" content="I interpret linear regression results to determine features that significantly affect house sale prices. I then use the same model to predict house prices, and evaluate the model using stratified k-fold cross-validation.">
+
+<title>Migs Germar’s Data Science Blog - Using Linear Regression to Predict House Sale Prices</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../posts/images/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Migs Germar’s Data Science Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MiguelAHG" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/migs-germar/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.facebook.com/miguelantonio.germar" rel="" target=""><i class="bi bi-facebook" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Using Linear Regression to Predict House Sale Prices</h1>
+                  <div>
+        <div class="description">
+          I interpret linear regression results to determine features that significantly affect house sale prices. I then use the same model to predict house prices, and evaluate the model using stratified k-fold cross-validation.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">seaborn</div>
+                <div class="quarto-category">matplotlib</div>
+                <div class="quarto-category">sklearn</div>
+                <div class="quarto-category">statsmodels</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Migs Germar </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 28, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#data-inspection-and-cleaning" id="toc-data-inspection-and-cleaning" class="nav-link" data-scroll-target="#data-inspection-and-cleaning">Data Inspection and Cleaning</a></li>
+  <li><a href="#statistical-inference" id="toc-statistical-inference" class="nav-link" data-scroll-target="#statistical-inference">Statistical Inference</a></li>
+  <li><a href="#predictive-modeling-and-evaluation" id="toc-predictive-modeling-and-evaluation" class="nav-link" data-scroll-target="#predictive-modeling-and-evaluation">Predictive Modeling and Evaluation</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">Bibliography</a>
+  <ul class="collapse">
+  <li><a href="#data-source" id="toc-data-source" class="nav-link" data-scroll-target="#data-source">Data Source</a></li>
+  <li><a href="#information-sources" id="toc-information-sources" class="nav-link" data-scroll-target="#information-sources">Information Sources</a></li>
+  <li><a href="#image-source" id="toc-image-source" class="nav-link" data-scroll-target="#image-source">Image Source</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/notebook-images/linreg-house-prices/houses_breno-assis_unsplash.jpg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<center>
+<a href="https://unsplash.com/photos/r3WAWU5Fi5Q">Unsplash | Breno Assis</a>
+</center>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The Ames, Iowa housing dataset was formed by De Cock in 2011 as a high-quality dataset for regression projects. It contains data on 80 features of 2930 houses. The target variable is the sale price of each house.</p>
+<p>In order to predict the target, I will use linear regression for both statistical inference and machine learning. To each feature (or independent variable), the model will assign a coefficient that shows how the feature affects the target (or dependent variable). I will use the model’s <span class="math inline">\(p\)</span> values to determine the features with statistically significant effects, then use these features in our final model for predicting prices from new data.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I wrote this notebook by following a guided project on the <a href="https://www.dataquest.io/">Dataquest</a> platform, specifically the <a href="https://app.dataquest.io/c/41/m/240/guided-project%3A-predicting-house-sale-prices/1/introduction">Guided Project: Predicting House Sale Prices</a>. The general project flow and research questions were guided by Dataquest. Other than what was instructed, I also added my own steps. You can visit the <a href="https://github.com/dataquestio/solutions/blob/master/Mission240Solutions.ipynb">official solution</a> to compare it to my project.</p>
+</div>
+</div>
+<p>Below are the packages used in this project.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sms</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Import custom modules that I wrote.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> custom_modules <span class="im">import</span> linreg_tools <span class="im">as</span> lrt, stratified_kfcv <span class="im">as</span> skf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that some of the imported modules are custom ones that I wrote. To view these modules, visit this <a href="https://github.com/MiguelAHG/mahg-data-science/tree/master/_notebooks/custom_modules">directory</a> in my website’s repository.</p>
+</section>
+<section id="data-inspection-and-cleaning" class="level1">
+<h1>Data Inspection and Cleaning</h1>
+<p>The journal article that introduced the Ames, Iowa housing dataset is linked <a href="https://www.tandfonline.com/doi/abs/10.1080/10691898.2011.11889627">here</a>. You may click the “PDF” button on the webpage to access the article, which contains the links to download the data file.</p>
+<p>A summary of the columns and their data types is shown below.</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>houses <span class="op">=</span> pd.read_excel(<span class="st">"./private/Linear-Regression-House-Prices-Files/AmesHousing.xls"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>houses.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 2930 entries, 0 to 2929
+Data columns (total 82 columns):
+ #   Column           Non-Null Count  Dtype  
+---  ------           --------------  -----  
+ 0   Order            2930 non-null   int64  
+ 1   PID              2930 non-null   int64  
+ 2   MS SubClass      2930 non-null   int64  
+ 3   MS Zoning        2930 non-null   object 
+ 4   Lot Frontage     2440 non-null   float64
+ 5   Lot Area         2930 non-null   int64  
+ 6   Street           2930 non-null   object 
+ 7   Alley            198 non-null    object 
+ 8   Lot Shape        2930 non-null   object 
+ 9   Land Contour     2930 non-null   object 
+ 10  Utilities        2930 non-null   object 
+ 11  Lot Config       2930 non-null   object 
+ 12  Land Slope       2930 non-null   object 
+ 13  Neighborhood     2930 non-null   object 
+ 14  Condition 1      2930 non-null   object 
+ 15  Condition 2      2930 non-null   object 
+ 16  Bldg Type        2930 non-null   object 
+ 17  House Style      2930 non-null   object 
+ 18  Overall Qual     2930 non-null   int64  
+ 19  Overall Cond     2930 non-null   int64  
+ 20  Year Built       2930 non-null   int64  
+ 21  Year Remod/Add   2930 non-null   int64  
+ 22  Roof Style       2930 non-null   object 
+ 23  Roof Matl        2930 non-null   object 
+ 24  Exterior 1st     2930 non-null   object 
+ 25  Exterior 2nd     2930 non-null   object 
+ 26  Mas Vnr Type     2907 non-null   object 
+ 27  Mas Vnr Area     2907 non-null   float64
+ 28  Exter Qual       2930 non-null   object 
+ 29  Exter Cond       2930 non-null   object 
+ 30  Foundation       2930 non-null   object 
+ 31  Bsmt Qual        2850 non-null   object 
+ 32  Bsmt Cond        2850 non-null   object 
+ 33  Bsmt Exposure    2847 non-null   object 
+ 34  BsmtFin Type 1   2850 non-null   object 
+ 35  BsmtFin SF 1     2929 non-null   float64
+ 36  BsmtFin Type 2   2849 non-null   object 
+ 37  BsmtFin SF 2     2929 non-null   float64
+ 38  Bsmt Unf SF      2929 non-null   float64
+ 39  Total Bsmt SF    2929 non-null   float64
+ 40  Heating          2930 non-null   object 
+ 41  Heating QC       2930 non-null   object 
+ 42  Central Air      2930 non-null   object 
+ 43  Electrical       2929 non-null   object 
+ 44  1st Flr SF       2930 non-null   int64  
+ 45  2nd Flr SF       2930 non-null   int64  
+ 46  Low Qual Fin SF  2930 non-null   int64  
+ 47  Gr Liv Area      2930 non-null   int64  
+ 48  Bsmt Full Bath   2928 non-null   float64
+ 49  Bsmt Half Bath   2928 non-null   float64
+ 50  Full Bath        2930 non-null   int64  
+ 51  Half Bath        2930 non-null   int64  
+ 52  Bedroom AbvGr    2930 non-null   int64  
+ 53  Kitchen AbvGr    2930 non-null   int64  
+ 54  Kitchen Qual     2930 non-null   object 
+ 55  TotRms AbvGrd    2930 non-null   int64  
+ 56  Functional       2930 non-null   object 
+ 57  Fireplaces       2930 non-null   int64  
+ 58  Fireplace Qu     1508 non-null   object 
+ 59  Garage Type      2773 non-null   object 
+ 60  Garage Yr Blt    2771 non-null   float64
+ 61  Garage Finish    2771 non-null   object 
+ 62  Garage Cars      2929 non-null   float64
+ 63  Garage Area      2929 non-null   float64
+ 64  Garage Qual      2771 non-null   object 
+ 65  Garage Cond      2771 non-null   object 
+ 66  Paved Drive      2930 non-null   object 
+ 67  Wood Deck SF     2930 non-null   int64  
+ 68  Open Porch SF    2930 non-null   int64  
+ 69  Enclosed Porch   2930 non-null   int64  
+ 70  3Ssn Porch       2930 non-null   int64  
+ 71  Screen Porch     2930 non-null   int64  
+ 72  Pool Area        2930 non-null   int64  
+ 73  Pool QC          13 non-null     object 
+ 74  Fence            572 non-null    object 
+ 75  Misc Feature     106 non-null    object 
+ 76  Misc Val         2930 non-null   int64  
+ 77  Mo Sold          2930 non-null   int64  
+ 78  Yr Sold          2930 non-null   int64  
+ 79  Sale Type        2930 non-null   object 
+ 80  Sale Condition   2930 non-null   object 
+ 81  SalePrice        2930 non-null   int64  
+dtypes: float64(11), int64(28), object(43)
+memory usage: 1.8+ MB</code></pre>
+</div>
+</div>
+<p>The output above shows the name of each column, its number of non-null values, and its data type. Most of the names are self-explanatory, but others are not so clear. One can visit the <a href="https://s3.amazonaws.com/dq-content/307/data_description.txt">data documentation</a> to learn what each column represents.</p>
+<p>Here are the first steps I took in order to clean these columns:</p>
+<ul>
+<li>Based on a suggestion in page 4 of De Cock (2011), I deleted 5 outlier observations which had above-ground living areas higher than 4000 square feet.</li>
+<li>I selected 9 useful numeric/ordinal columns and 2 useful categorical columns based on their descriptions in the data documentation.</li>
+<li>I transformed the <code>Overall Qual</code> and <code>Overall Cond</code> columns. Originally, these contained integers from 1 to 10, which represented ordinal ratings from Very Poor to Very Excellent. I put these ratings into 4 groups:
+<ul>
+<li>1 represents Very Poor to Fair</li>
+<li>2 represents Below Average to Above Average</li>
+<li>3 represents Good and Very Good</li>
+<li>4 represents Excellent and Very Excellent</li>
+</ul></li>
+<li>I inspected the missing values in my final set of columns.</li>
+</ul>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove outliers based on suggestion in journal article</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>houses <span class="op">=</span> houses.loc[houses[<span class="st">"Gr Liv Area"</span>] <span class="op">&lt;</span> <span class="dv">4000</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify important columns</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>useful_numerics <span class="op">=</span> [</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Lot Frontage"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Lot Area"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Mas Vnr Area"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Total Bsmt SF"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Gr Liv Area"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Fireplaces"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Garage Area"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The 2 below are ordinal.</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Overall Qual"</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Overall Cond"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>useful_categoricals <span class="op">=</span> [</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Lot Config"</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Bldg Type"</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>target_col <span class="op">=</span> <span class="st">"SalePrice"</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep only the important columns</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>houses <span class="op">=</span> houses.loc[:, useful_numerics <span class="op">+</span> useful_categoricals <span class="op">+</span> [target_col]]</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>ratings_simplified <span class="op">=</span> {</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="dv">10</span>: <span class="dv">4</span>,</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="dv">9</span>: <span class="dv">4</span>,</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span>: <span class="dv">3</span>,</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="dv">7</span>: <span class="dv">3</span>,</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="dv">6</span>: <span class="dv">2</span>,</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="dv">5</span>: <span class="dv">2</span>,</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span>: <span class="dv">2</span>,</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span>: <span class="dv">1</span>,</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>: <span class="dv">1</span>,</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>: <span class="dv">1</span>,</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace integers in these two columns with a new set of integers</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> [<span class="st">"Overall Qual"</span>, <span class="st">"Overall Cond"</span>]:</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    houses[col] <span class="op">=</span> houses[col].replace(ratings_simplified)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>houses.isnull().<span class="bu">sum</span>() <span class="op">/</span> houses.shape[<span class="dv">0</span>] <span class="op">*</span> <span class="dv">100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>Lot Frontage     16.752137
+Lot Area          0.000000
+Mas Vnr Area      0.786325
+Total Bsmt SF     0.034188
+Gr Liv Area       0.000000
+Fireplaces        0.000000
+Garage Area       0.034188
+Overall Qual      0.000000
+Overall Cond      0.000000
+Lot Config        0.000000
+Bldg Type         0.000000
+SalePrice         0.000000
+dtype: float64</code></pre>
+</div>
+</div>
+<p>The table above shows the percentage of missing values in each column. Most columns have less than 1% missingness, but the <code>Lot Frontage</code> column has almost 17% missingness. This is higher than my preferred benchmark of 5% missingness, so I will remove the <code>Lot Frontage</code> column.</p>
+<p>After deleting that column, I will remove rows where there are any remaining missing values.</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>houses <span class="op">=</span> houses.drop(<span class="st">"Lot Frontage"</span>, axis <span class="op">=</span> <span class="dv">1</span>).dropna()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total number of missing values: </span><span class="sc">{</span>houses<span class="sc">.</span>isnull()<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"New shape: </span><span class="sc">{</span>houses<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total number of missing values: 0
+New shape: (2900, 11)</code></pre>
+</div>
+</div>
+<p>Now, the dataset has 2900 rows and 11 columns, including 10 features and 1 target.</p>
+<p>Next, two of my features are categorical. Thus, in order to use them in regression, I have to dummy code them. According to the UCLA: Statistical Consulting Group (2021), if there are <span class="math inline">\(k\)</span> categories in one variable, I must make <span class="math inline">\(k - 1\)</span> new variables containing zeroes and ones. The reason that only <span class="math inline">\(k - 1\)</span> variables are made is that one category has to be set aside as the “reference level.” The other categories will be compared to the reference level when I fit the model.</p>
+<p>In Python, I will do this using the <code>pd.get_dummies()</code> function. I will set the <code>drop_first</code> parameter to <code>True</code> so that one category will be excluded from the final variables.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [<span class="st">"Lot Config"</span>, <span class="st">"Bldg Type"</span>]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>houses <span class="op">=</span> houses.merge(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    pd.get_dummies(houses[cat_features], drop_first <span class="op">=</span> <span class="va">True</span>),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    left_index <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    right_index <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    how <span class="op">=</span> <span class="st">"outer"</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>houses <span class="op">=</span> houses.drop(cat_features, axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    houses</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    .loc[:, houses.columns.to_series().<span class="bu">str</span>.match(<span class="vs">r"Lot Config|Bldg Type"</span>)]</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    .head()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Lot Config_CulDSac</th>
+<th data-quarto-table-cell-role="th">Lot Config_FR2</th>
+<th data-quarto-table-cell-role="th">Lot Config_FR3</th>
+<th data-quarto-table-cell-role="th">Lot Config_Inside</th>
+<th data-quarto-table-cell-role="th">Bldg Type_2fmCon</th>
+<th data-quarto-table-cell-role="th">Bldg Type_Duplex</th>
+<th data-quarto-table-cell-role="th">Bldg Type_Twnhs</th>
+<th data-quarto-table-cell-role="th">Bldg Type_TwnhsE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The table above shows the first 5 rows of the new variables that were created. Since there were 5 categories in the <code>Lot Config</code> variable, 4 new variables were created. This is also the case for the <code>Bldg Type</code> variable.</p>
+<p>Let’s take the first column, <code>Lot Config_CulDSac</code>, as an example. It represents houses that are situated on a cul-de-sac. A house with a value of 1 in this column is a house on a cul-de-sac. Other houses, with values of 0, are not.</p>
+<p>The data is clean now, so I can proceed to statistical inference.</p>
+</section>
+<section id="statistical-inference" class="level1">
+<h1>Statistical Inference</h1>
+<p>In this section, I will fit an Ordinary least Squares (OLS) linear regression model. Then, I will check the assumptions of linear regression in order to make sure that this is the right model for the problem. I will also use the results of the model to select the best features.</p>
+<p>The code below fits the OLS model and outputs the first of three tables of results. I will interpret the results based on what I learned from the article “Linear Regression” by Python for Data Science (n.d.).</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>feature_cols <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> houses.columns <span class="cf">if</span> x <span class="op">!=</span> target_col]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a constant column in the dataset so that the model can find the y-intercept.</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> sms.add_constant(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    houses[feature_cols]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> houses[target_col]</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Obtain Variance Inflation Factors.</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>vif_df <span class="op">=</span> lrt.get_vif(X)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sms.OLS(y, X)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> model.fit()</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>summary <span class="op">=</span> results.summary()</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>tables <span class="op">=</span> lrt.extract_summary(summary, vif_df)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>tables[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\migs\anaconda3\envs\new_streamlit_env2\lib\site-packages\statsmodels\tsa\tsatools.py:142: FutureWarning: In a future version of pandas all arguments of concat except for the argument 'objs' will be keyword-only
+  x = pd.concat(x[::order], 1)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Dep. Variable:</td>
+<td>SalePrice</td>
+<td>R-squared:</td>
+<td>0.838</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Model:</td>
+<td>OLS</td>
+<td>Adj. R-squared:</td>
+<td>0.837</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Method:</td>
+<td>Least Squares</td>
+<td>F-statistic:</td>
+<td>929.200</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Date:</td>
+<td>Fri, 14 Jan 2022</td>
+<td>Prob (F-statistic):</td>
+<td>0.000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Time:</td>
+<td>14:44:14</td>
+<td>Log-Likelihood:</td>
+<td>-34163.000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>No. Observations:</td>
+<td>2900</td>
+<td>AIC:</td>
+<td>68360.000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>Df Residuals:</td>
+<td>2883</td>
+<td>BIC:</td>
+<td>68460.000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>Df Model:</td>
+<td>16</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>Covariance Type:</td>
+<td>nonrobust</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>This first table shows two important things. The R-squared value is equal to 0.838, meaning that the model explained 83.8% of the variance in the data. Ideally, I would want a value close to 100% but this is good. Also, the p value of the F-statistic is equal to 0. Since <span class="math inline">\(p &lt; 0.05\)</span>, the model was statistically significant overall.</p>
+<p>Next, below is the second table of results.</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tables[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">coef</th>
+<th data-quarto-table-cell-role="th">std err</th>
+<th data-quarto-table-cell-role="th">t</th>
+<th data-quarto-table-cell-role="th">P&gt;|t|</th>
+<th data-quarto-table-cell-role="th">[0.025</th>
+<th data-quarto-table-cell-role="th">0.975]</th>
+<th data-quarto-table-cell-role="th">VIF</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">feature</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">const</td>
+<td>-105800.0000</td>
+<td>4319.486</td>
+<td>-24.498</td>
+<td>0.000</td>
+<td>-114000.000</td>
+<td>-97400.000</td>
+<td>53.813031</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Lot Area</td>
+<td>0.5717</td>
+<td>0.084</td>
+<td>6.789</td>
+<td>0.000</td>
+<td>0.407</td>
+<td>0.737</td>
+<td>1.243636</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Mas Vnr Area</td>
+<td>49.6396</td>
+<td>3.863</td>
+<td>12.849</td>
+<td>0.000</td>
+<td>42.065</td>
+<td>57.214</td>
+<td>1.334007</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Total Bsmt SF</td>
+<td>40.8966</td>
+<td>1.780</td>
+<td>22.979</td>
+<td>0.000</td>
+<td>37.407</td>
+<td>44.386</td>
+<td>1.618427</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Gr Liv Area</td>
+<td>48.9365</td>
+<td>1.660</td>
+<td>29.481</td>
+<td>0.000</td>
+<td>45.682</td>
+<td>52.191</td>
+<td>1.883476</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Fireplaces</td>
+<td>7000.7868</td>
+<td>1069.148</td>
+<td>6.548</td>
+<td>0.000</td>
+<td>4904.416</td>
+<td>9097.158</td>
+<td>1.373267</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Garage Area</td>
+<td>53.8240</td>
+<td>3.528</td>
+<td>15.256</td>
+<td>0.000</td>
+<td>46.906</td>
+<td>60.742</td>
+<td>1.643206</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Overall Qual</td>
+<td>44530.0000</td>
+<td>1344.831</td>
+<td>33.113</td>
+<td>0.000</td>
+<td>41900.000</td>
+<td>47200.000</td>
+<td>1.924753</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Overall Cond</td>
+<td>9206.0505</td>
+<td>1269.656</td>
+<td>7.251</td>
+<td>0.000</td>
+<td>6716.526</td>
+<td>11700.000</td>
+<td>1.056642</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Lot Config_CulDSac</td>
+<td>14770.0000</td>
+<td>2804.614</td>
+<td>5.265</td>
+<td>0.000</td>
+<td>9266.896</td>
+<td>20300.000</td>
+<td>1.307018</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Lot Config_FR2</td>
+<td>371.8734</td>
+<td>3776.296</td>
+<td>0.098</td>
+<td>0.922</td>
+<td>-7032.639</td>
+<td>7776.385</td>
+<td>1.156834</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Lot Config_FR3</td>
+<td>8290.0511</td>
+<td>8929.437</td>
+<td>0.928</td>
+<td>0.353</td>
+<td>-9218.674</td>
+<td>25800.000</td>
+<td>1.026279</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Lot Config_Inside</td>
+<td>4695.2344</td>
+<td>1586.888</td>
+<td>2.959</td>
+<td>0.003</td>
+<td>1583.685</td>
+<td>7806.784</td>
+<td>1.425754</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Bldg Type_2fmCon</td>
+<td>-21140.0000</td>
+<td>4144.743</td>
+<td>-5.100</td>
+<td>0.000</td>
+<td>-29300.000</td>
+<td>-13000.000</td>
+<td>1.036636</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Bldg Type_Duplex</td>
+<td>-24340.0000</td>
+<td>3214.492</td>
+<td>-7.572</td>
+<td>0.000</td>
+<td>-30600.000</td>
+<td>-18000.000</td>
+<td>1.078048</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Bldg Type_Twnhs</td>
+<td>-9050.9650</td>
+<td>3363.564</td>
+<td>-2.691</td>
+<td>0.007</td>
+<td>-15600.000</td>
+<td>-2455.731</td>
+<td>1.096859</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Bldg Type_TwnhsE</td>
+<td>3408.7248</td>
+<td>2328.503</td>
+<td>1.464</td>
+<td>0.143</td>
+<td>-1156.975</td>
+<td>7974.425</td>
+<td>1.146414</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Each row other than the <code>constant</code> row represents a feature.</p>
+<p>The <code>coef</code> column gives the increase in the target for a one-unit increase in the feature (Frost, 2017). For example, the coefficient of <code>Gr Liv Area</code> (above-ground living area in square feet) is around 49. Therefore, for every 1 square foot increase in living area, the sale price increases by USD 49.</p>
+<p>According to UCLA: Statistical Consulting Group (2021), the coefficient of a dummy-coded variable gives the difference between the mean of the target for the level of interest and the mean of the target for the reference level. For example, the coefficient of <code>Lot Config_CulDSac</code> is 14,770. Therefore, the price of a house on a cul-de-sac is usually USD 14,770 higher than that of a house on a corner lot.</p>
+<p>The <code>P&gt;|t|</code> column gives the p value of each feature. A p value less than 0.05 can be considered statistically significant, whereas a p value above that threshold is not. In the case of this model, most of the features are statistically significant.</p>
+<p>The insignificant features are <code>Lot Config_FR2</code> (houses with frontage on 2 sides), <code>Lot Config_FR3</code>, and <code>Bldg Type_TwnhsE</code> (Townhouse End Units). Though these are not significant, I will keep them in the model because they are necessary components of the dummy-coded categorical variables.</p>
+<p>Next, the <code>VIF</code> column contains Variance Inflation Factors. I wrote code to calculate these values based on an article, “Detecting Multicollinearity with VIF – Python,” by cosine1509 (2020).</p>
+<p>According to Frost (2017), VIFs are a measure of <strong>multicollinearity</strong> among independent variables. The lowest possible value is 1, which means no collinearity at all. Values between 1 and 5 show low to moderate multicollinearity, so these are acceptable. However, values over 5 show high multicollinearity and need to be investigated.</p>
+<p>In the case of this model, all of the VIFs of the features are below 2. The VIF of the constant term is high, but this is not important.</p>
+<p>In summary, based on the p values and VIF values, there is no need to change the features used in the model. Most of them are significant, and all of them have low multicollinearity.</p>
+<p>Finally, let us look at the third table of results.</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tables[<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Omnibus:</td>
+<td>421.519</td>
+<td>Durbin-Watson:</td>
+<td>1.583</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Prob(Omnibus):</td>
+<td>0.000</td>
+<td>Jarque-Bera (JB):</td>
+<td>3490.274</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Skew:</td>
+<td>0.426</td>
+<td>Prob(JB):</td>
+<td>0.000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Kurtosis:</td>
+<td>8.307</td>
+<td>Cond. No.</td>
+<td>195000.000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The Durbin-Watson test statistic is 1.583. According to Python for Data Science (n.d.), this statistic should ideally be close to 2. If it is below 2, there is positive autocorrelation among the residuals, so one of the assumptions of linear regression is violated. However, as a rule of thumb, values between 1.5 and 2.5 are acceptable. Thus, this statistic is not a cause of concern.</p>
+<p>On the other hand, the Jarque-Bera p value is 0. Because <span class="math inline">\(p &lt; 0.05\)</span>, the statistic is significant, so the residuals are not distributed normally. However, Mordkoff (2016) says that according to the Central Limit Theorem, “as long as the sample is based on 30 or more observations, the sampling distribution of the mean can be safely assumed to be normal.” Therefore, this is fine.</p>
+<p>That’s it for the statistical inference part of this project. Now that I know that my variables are statistically significant, I can make a predictive model and evaluate it.</p>
+</section>
+<section id="predictive-modeling-and-evaluation" class="level1">
+<h1>Predictive Modeling and Evaluation</h1>
+<p>In this last part, I will use scikit-learn to fit a linear regression model for prediction. A 5-fold cross-validation will be used in order to evaluate the model.</p>
+<p>In my <a href="../posts/2021-12-21-predicting-car-prices-k-nearest-neighbors.html">recent project</a> about the KNN model, I wrote some custom functions that help perform <em>stratified</em> cross-validation. This means that the folds are divided such that each fold’s target distribution (in this case, price distribution) is similar to that of the full sample. I put the custom functions in this <a href="https://github.com/MiguelAHG/mahg-data-science/blob/master/_notebooks/custom_modules/stratified_kfcv.py">module</a> for your reference.</p>
+<p>I performed stratified 5-fold cross-validation on the housing data, so 5 models were fitted and their RMSEs were recorded. The results are shown below.</p>
+<div class="cell" data-execution_count="9">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fold_series <span class="op">=</span> skf.stratify_continuous(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    n_folds <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> houses[<span class="st">"SalePrice"</span>],</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>mse_lst <span class="op">=</span> skf.stratified_kfcv(</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> sms.add_constant(houses[feature_cols]),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> houses[target_col],</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    fold_series <span class="op">=</span> fold_series,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    regression_model <span class="op">=</span> lr,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>rmses <span class="op">=</span> pd.Series(mse_lst).<span class="bu">pow</span>(<span class="dv">1</span><span class="op">/</span><span class="dv">2</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"""RMSE Values:</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>rmses<span class="sc">}</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="ss">Mean RMSE: </span><span class="sc">{</span>rmses<span class="sc">.</span>mean()<span class="sc">}</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="ss">SD RMSE: </span><span class="sc">{</span>rmses<span class="sc">.</span>std(ddof <span class="op">=</span> <span class="dv">1</span>)<span class="sc">}</span><span class="ss">"""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>RMSE Values:
+0    32046.873780
+1    30927.932397
+2    30637.750905
+3    33020.953872
+4    32832.216461
+dtype: float64
+Mean RMSE: 31893.145482987817
+SD RMSE: 1082.253470974206</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\migs\anaconda3\envs\new_streamlit_env2\lib\site-packages\statsmodels\tsa\tsatools.py:142: FutureWarning: In a future version of pandas all arguments of concat except for the argument 'objs' will be keyword-only
+  x = pd.concat(x[::order], 1)</code></pre>
+</div>
+</div>
+<p>The mean RMSE is 31,893. Therefore, the predicted prices are usually USD 31,893 away from the true prices. Also, the standard deviation RMSE is around 1082, so the RMSE values were relatively consistent from test to test.</p>
+<p>The mean RMSE may seem high, but remember the distribution of house prices in the dataset:</p>
+<div class="cell" data-execution_count="12">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> houses,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="st">"SalePrice"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribution of House Sale Prices"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Sale Price (USD)"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2021-12-28-Linear-Regression-House-Prices_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The prices are mostly around USD 100,000 to USD 300,000. Thus, the mean RMSE is relatively small considering the prices. Therefore, I would say that the model performs decently, but it could be improved.</p>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>In this project, I cleaned data about houses in Ames, Iowa, selected features that may be useful, interpreted linear regression results to determine significant features, then evaluated a predictive model. I found that the 16 independent variables explained 83.8% of the variance <span class="math inline">\((R^2 = 0.838, F(16, 2883 = 929.2), p &lt; 0.05)\)</span>. Furthermore, the predictive model had a mean RMSE of 31,880, which was decent but not ideal.</p>
+<p>Thanks for reading!</p>
+</section>
+<section id="bibliography" class="level1">
+<h1>Bibliography</h1>
+<section id="data-source" class="level2">
+<h2 class="anchored" data-anchor-id="data-source">Data Source</h2>
+<p>De Cock, D. (2011). Ames, Iowa: Alternative to the Boston Housing Data as an End of Semester Regression Project. Journal of Statistics Education, 19(3), null. https://doi.org/10.1080/10691898.2011.11889627</p>
+</section>
+<section id="information-sources" class="level2">
+<h2 class="anchored" data-anchor-id="information-sources">Information Sources</h2>
+<p>Coding Systems for Categorical Variables in Regression Analysis. (n.d.). UCLA: Statistical Consulting Group. Retrieved December 26, 2020, from https://stats.idre.ucla.edu/spss/faq/coding-systems-for-categorical-variables-in-regression-analysis-2/</p>
+<p>cosine1509. (2020, August 14). Detecting Multicollinearity with VIF - Python. GeeksforGeeks. https://www.geeksforgeeks.org/detecting-multicollinearity-with-vif-python/</p>
+<p>Frost, J. (2017a, April 2). Multicollinearity in Regression Analysis: Problems, Detection, and Solutions. Statistics By Jim. http://statisticsbyjim.com/regression/multicollinearity-in-regression-analysis/</p>
+<p>Frost, J. (2017b, April 12). How to Interpret P-values and Coefficients in Regression Analysis. Statistics By Jim. http://statisticsbyjim.com/regression/interpret-coefficients-p-values-regression/</p>
+<p>Mordkoff, J. T. (2016). The Assumption(s) of Normality. http://www2.psychology.uiowa.edu/faculty/mordkoff/GradStats/part%201/I.07%20normal.pdf</p>
+<p>Python for Data Science. (2018, March 15). Linear Regression. Python for Data Science. https://pythonfordatascienceorg.wordpress.com/linear-regression-python/</p>
+</section>
+<section id="image-source" class="level2">
+<h2 class="anchored" data-anchor-id="image-source">Image Source</h2>
+<p>Assis, B. (2018, January 17). Photo by Breno Assis on Unsplash. Unsplash. https://unsplash.com/photos/r3WAWU5Fi5Q</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

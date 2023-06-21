@@ -1,0 +1,25 @@
+---
+title: "Home"
+listing:
+  contents: posts
+  sort:
+    - "sticky_rank asc"
+    - "date desc"
+  type: default
+  categories: true
+  sort-ui: false
+  filter-ui: true
+page-layout: full
+title-block-banner: true
+---
+
+
+# Hi, I'm Migs Germar.
+
+Welcome to my data science blog. Feel free to explore my posts below. I recommend checking out [My Portfolio Projects](posts/2022-07-10-My-Portfolio-Projects.md), which lists my best works. You can also click a category on the right side of the page to filter the posts. 
+
+If you'd like to get in touch, see the [About](about.qmd) page.
+
+Thanks for visiting!
+
+![](posts/images/logo.png){fig-align="center"}
