@@ -13,7 +13,7 @@ about:
     - icon: github
       text: Github
       href: https://github.com/MiguelAHG
-
+comments: false
 ---
 
 I am Miguel Antonio H. Germar, but you can call me Migs. I am a second year college student from Quezon City, Philippines. Currently, I am in my second year in the BS Applied Mathematics - Master in Data Science program in Ateneo de Manila University. I'm interested in pursuing a career in data science, so I set up this website as a blog and portfolio for my projects.

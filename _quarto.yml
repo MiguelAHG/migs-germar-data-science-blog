@@ -14,6 +14,18 @@ website:
         href: https://www.linkedin.com/in/migs-germar/
       - icon: facebook
         href: https://www.facebook.com/miguelantonio.germar
+  comments:
+    giscus:
+      repo: MiguelAHG/migs-germar-data-science-blog
+      repo-id: R_kgDOJySw9w
+      category: Announcements
+      category-id: DIC_kwDOJySw984CXXr6
+      mapping: pathname
+      reactions-enabled: true
+      loading: lazy
+      input-position: top
+      theme: light
+      language: en
 format:
   html:
     theme: cosmo
