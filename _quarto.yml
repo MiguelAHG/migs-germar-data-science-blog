@@ -26,6 +26,7 @@ website:
       input-position: top
       theme: light
       language: en
+  google-analytics: "G-99SLFW8P3J"
 format:
   html:
     theme: cosmo
