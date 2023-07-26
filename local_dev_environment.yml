@@ -1,0 +1,28 @@
+# To create a conda environment from this file, run the following command in Anaconda Prompt. Replace ENV_NAME with the desired name for the new environment, and FILE_NAME with the name of this file.
+# conda env create --name ENV_NAME --file FILE_NAME.yml
+# Remember to run: pip uninstall rtree
+# 
+channels:
+  - defaults
+dependencies:
+  - python=3.8.11
+  - openpyxl=3.0.7
+  - scikit-learn=1.0.1
+  - ipykernel=6.4.1
+  - matplotlib=3.4.2
+  - pandas=1.4.2
+  - pywin32=301
+  - xlrd=2.0.1
+  - chardet=4.0.0
+  - scipy=1.7.3
+  - python-levenshtein=0.12.2
+  - sqlite=3.38.2
+  - altair=4.1.0
+  - lxml=4.6.4
+  - numpy=1.20.3
+  - ipython-sql=0.3.9
+  - geopandas=0.10.2
+  - seaborn=0.11.2
+  - statsmodels=0.12.2
+  - plotly=5.4.0
+  - pygeos=0.10.2
