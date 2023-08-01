@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Migs Germar">
-<meta name="dcterms.date" content="2022-07-10">
-<meta name="description" content="A list of my best original works and links to view them.">
+<meta name="dcterms.date" content="2023-08-01">
+<meta name="description" content="I developed a web app where Pokemon players can input their teams and generate visualizations based on type effectiveness.">
 
-<title>Migs Germar’s Data Science Blog - 📌 My Portfolio Projects</title>
+<title>Migs Germar’s Data Science Blog - MG Pokemon Team Inspector: a data viz web app for Pokemon players</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -124,14 +124,17 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">📌 My Portfolio Projects</h1>
+      <h1 class="title">MG Pokemon Team Inspector: a data viz web app for Pokemon players</h1>
                   <div>
         <div class="description">
-          A list of my best original works and links to view them.
+          I developed a web app where Pokemon players can input their teams and generate visualizations based on type effectiveness.
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">portfolio</div>
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">streamlit</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">altair</div>
               </div>
                   </div>
   </div>
@@ -149,16 +152,10 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">July 10, 2022</p>
+        <p class="date">August 1, 2023</p>
       </div>
     </div>
     
-      <div>
-      <div class="quarto-title-meta-heading">Modified</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date-modified">August 1, 2023</p>
-      </div>
-    </div>
       
     </div>
     
@@ -173,31 +170,78 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 
 
 
-<p>This post lists my portfolio projects, which are my best original works.</p>
-<p>Among the blog posts on my website, many of these are “guided projects,” meaning that the data and the research ideas were provided by an online course like Dataquest. Guided projects are only partly original, as I put my own unique twist on them. The portfolio projects showcased below, however, are completely original.</p>
-<section id="project-sparta-butuan-city-open-data-challenge" class="level1">
-<h1>2021 Project SPARTA Butuan City Open Data Challenge</h1>
-<p>I led a team to participate in this competition from June to November of 2021. I cleaned data about the disaster risk of Butuan City’s agriculture sector vis-a-vis natural hazards. Then, I developed agriHanda, a dashboard visualizing the data in various forms, such as a colored map of the city, a data summary for each barangay (town), and a custom graphing tool. For this, we won the Second Placer award and Best in Ingenious Solution award, along with a Php 11,500 cash prize and freebies.</p>
-<p>Skills used: Python, data cleaning, dashboard development, interactive data visualization, Geographic Information Systems (GIS)</p>
-<p>Read more about the competition in this blog post: <a href="../posts/2021-12-17-agriHanda-Agricultural-Disaster-Risk-Web-App.html">agriHanda: an Agricultural Disaster Risk Web App</a></p>
-</section>
-<section id="ashs-student-mapping-project" class="level1">
-<h1>ASHS Student Mapping Project</h1>
-<p>In late 2021, I and the officers of the ASHS Programming Varsity (ProgVar) were approached by the school administration with a request to develop an app that would help identify students affected by natural hazards. Thus, I proposed the Student Mapping Project. I set up a database of student locations and developed a web app to be used by the school’s student-led disaster risk committee. The app can take a list of affected areas and generate a list of students who live in those areas, as well as a map showing their geographic distribution. This app helps identify which students should be contacted first and given assistance.</p>
-<p>Skills used: Python, web app development, data transformation, Geographic Information Systems (GIS).</p>
-<p>Read more in this blog post: <a href="../posts/2022-05-10-Student-Mapping-Project.html">Student Mapping Project</a></p>
-</section>
-<section id="ashs-college-applications-dashboard" class="level1">
-<h1>ASHS College Applications Dashboard</h1>
-<p>In my school’s Data Analytics Committee (DAC), I made the College Applications Dashboard to create various visualizations of the results of a survey about my schoolmates’ college choices and the factors influencing them.</p>
-<p>Skills used: Python, dashboard development, interactive data visualization.</p>
-<p>Read more in this blog post: <a href="../posts/2022-07-05-College-Applications-Dashboard.html">College Applications Dashboard</a></p>
-</section>
-<section id="mg-pokemon-team-inspector-web-app" class="level1">
-<h1>MG Pokemon Team Inspector web app</h1>
-<p>I made a web app to help Pokemon players evaluate the usefulness of both individual Pokemon and teams of Pokemon. It has a high degree of customization, taking into account each Pokemon’s species, move types, and abilities to calculate offensive capacity, defensive capacity, and overall usefulness. Most of the data is ordinal, so it is visualized using color-coded tables and bar charts, with helpful tooltips that can be viewed by hovering over the chart with your cursor. These visualizations were constructed using the Altair data visualization package.</p>
-<p>Skills used: Python, web app development, data transformation, interactive data visualization</p>
-<p>Read more about this project here: <a href="../posts/2023-08-01-MG-Pokemon-Team-Inspector.html">MG Pokemon Team Inspector: a data viz web app for Pokemon players</a></p>
+<p>I’ve been dissatisfied for a long time with websites that analyze Pokemon based on type effectiveness because they tend to have one or more of these drawbacks:</p>
+<ul>
+<li>They don’t consider both offense and defense simultaneously.</li>
+<li>They don’t let you input custom Pokemon with any type combination, move types, and two Abilities of your choice.</li>
+<li>They make you input the Ability of each Pokemon manually. Some people may not realize that their Pokemon has a Hidden Ability that affects its type matchups.</li>
+<li>They only use the type effectiveness rules for the latest generation of Pokemon games, making their insights inaccurate to older games.</li>
+</ul>
+<p><strong>With this in mind, I made an improved web app, which you can access here:</strong></p>
+<p><a href="https://mg-pokemon-team-inspector.streamlit.app/">https://mg-pokemon-team-inspector.streamlit.app/</a></p>
+<p>First, you would input your Pokemon team into the app and it would be displayed like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/mg-pokemon-team-inspector/1-team-viewer.png" class="img-fluid figure-img" width="500"></p>
+</figure>
+</div>
+<p>You have the following options in managing your teams: add Pokemon, edit Pokemon, save the team so you can load it into the app later, or delete the team.</p>
+<p>You can choose a Pokemon’s species from the complete Pokedex and input the types of damaging moves your Pokemon has. In some cases, you will be prompted to indicate which Ability your Pokemon has, since this affects its type matchups. <strong>All of this information will be used later in the analysis.</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/mg-pokemon-team-inspector/2-team-actions.png" class="img-fluid figure-img" width="500"></p>
+</figure>
+</div>
+<p>Different Pokemon generations have different rules about which types are effective against others and which Abilities affect a Pokemon’s type defenses.</p>
+<p><strong>The app takes care of all of that automatically.</strong> All you have to do is select the generation of the game you’re playing in the Select Generation page.</p>
+<p>If you have some Pokemon that are incompatible with the selected generation, the app tells you the problem so you can fix it, like in this picture:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/mg-pokemon-team-inspector/3-select-generation.png" class="img-fluid figure-img" width="700"></p>
+</figure>
+</div>
+<p>Next, you can look at the Analyze Individual Pokemon page. There are three aspects to choose from: Balance, Offense, and Defense. <strong>The Balance aspect considers both the offense and defense of the Pokemon against each possible enemy type.</strong> It displays labels describing the Pokemon’s usefulness against each type.</p>
+<p>For example, the picture below shows an analysis of the Pokemon Vespiquen. <strong>This Pokemon is labeled as a “Hard Counter” against Grass type Pokemon because it both deals supereffective damage, and takes not-very-effective damage, when fighting Grass types.</strong></p>
+<p>Plus, the rightmost column of the table tells you which of your Pokemon’s move types deal the most damage against a particular type of enemy.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/mg-pokemon-team-inspector/4-individual-analysis-balanced-main.png" class="img-fluid figure-img" width="600"></p>
+</figure>
+</div>
+<p>The Offense and Defense aspects have similar tables, but they also have bar charts and other messages to the user. These summarize the information and note important things to look out for.</p>
+<p>Here’s the summary for the Defense analysis of one Pokemon:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/mg-pokemon-team-inspector/5-individual-analysis-defense-summary.png" class="img-fluid figure-img" width="600"></p>
+</figure>
+</div>
+<p>Finally, the most useful feature of the app is its ability to analyze an entire team of Pokemon, showing you how many of your Pokemon are bad, OK, useful, and optimal against each type of enemy. This can help you think of ways to modify your team to cover a wider range of situations.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/mg-pokemon-team-inspector/6-team-analysis-balanced-main.png" class="img-fluid figure-img" width="600"></p>
+</figure>
+</div>
+<p>In this case, I hovered my mouse over the bottom right cell, so that’s why a message popped up and said, “Dewott is a Hard Counter against Steel.” I can hover over any cell in the table to get an explanation like this to help me interpret it.</p>
+<p><strong>In the leftmost column, I can immediately see that I have at least one optimal Pokemon against most types of enemies, except for Psychic and Dragon.</strong> I have some Pokemon that are useful against these types, but not optimal. I may want to adjust my team to fix this.</p>
+<p>Also, if I encounter an enemy of a particular type, like Fighting, I can look at the row in the table with the same name. It shows me that I should avoid using Magnemite and Lucario against Fighting types, but Roselia is useful and Vespiquen is optimal.</p>
+<p>Under that chart, there is also a “Detailed View” that lets you choose one enemy type and see the exact numbers behind the insights.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/mg-pokemon-team-inspector/7-team-analysis-balanced-detailed.png" class="img-fluid figure-img" width="600"></p>
+</figure>
+</div>
+<p>This project used the Streamlit framework for web app development, the pandas package for data manipulation, and the Altair package for data visualization.</p>
+<p>Thanks for reading!</p>
+<section id="credits" class="level1">
+<h1>Credits</h1>
+<p>The app was developed by Miguel Antonio H. Germar.</p>
+<p>I used the Pokedex dataset <code>Pokedex_Ver_SV2.csv</code>, which was downloaded from the following webpage; it is provided publicly without any explicit license. I used the data on Pokemon species names, single and dual typings, Abilities, and Hidden Abilities from this dataset.</p>
+<p><code>Takamasa Kato. “Pokemon All Status Data (Gen1 to 9).” Kaggle, April 14, 2023. https://www.kaggle.com/datasets/takamasakato/pokemon-all-status-data.</code></p>
+<p>I created datasets with type effectiveness multipliers (for example, 2 is the multiplier of Fire attacks against Grass Pokemon) by manually copying the numbers in the type chart in the following reference:</p>
+<p><code>Pokémon Database. “Pokémon Type Chart: Strengths and Weaknesses.” Pokémon Database, 2023. https://pokemondb.net/type.</code></p>
+<p>I obtained the list of Pokemon Abilities that affect type effectiveness (e.g., Dry Skin, Earth Eater, etc.) from the Pokemon Calculator website:</p>
+<p><code>Fennel, S. (2023). Pokémon Type Calculator Defense Page. Pokémon Type Calculator. https://www.pkmn.help/defense</code></p>
+<p>Then, I used <a href="https://bulbapedia.bulbagarden.net/wiki/Main_Page">Bulbapedia</a> to learn how exactly those Abilities affect type effectiveness multipliers.</p>
 
 
 </section>
