@@ -176,6 +176,7 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 <li>They don’t let you input custom Pokemon with any type combination, move types, and two Abilities of your choice.</li>
 <li>They make you input the Ability of each Pokemon manually. Some people may not realize that their Pokemon has a Hidden Ability that affects its type matchups.</li>
 <li>They only use the type effectiveness rules for the latest generation of Pokemon games, making their insights inaccurate to older games.</li>
+<li>They don’t let you assess how useful one team of Pokemon is against another specific team.</li>
 </ul>
 <p><strong>With this in mind, I made an improved web app, which you can access here:</strong></p>
 <p><a href="https://mg-pokemon-team-inspector.streamlit.app/">https://mg-pokemon-team-inspector.streamlit.app/</a></p>
@@ -200,7 +201,7 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 <p><img src="images/markdown-images/mg-pokemon-team-inspector/3-select-generation.png" class="img-fluid figure-img" width="700"></p>
 </figure>
 </div>
-<p>Next, you can look at the Analyze Individual Pokemon page. There are three aspects to choose from: Balance, Offense, and Defense. <strong>The Balance aspect considers both the offense and defense of the Pokemon against each possible enemy type.</strong> It displays labels describing the Pokemon’s usefulness against each type.</p>
+<p>Next, you can look at the <strong>Analyze Individual Pokemon</strong> page. There are three aspects to choose from: Balance, Offense, and Defense. The Balance aspect considers both the offense and defense of the Pokemon against each possible enemy type. It displays labels describing the Pokemon’s usefulness against each type.</p>
 <p>For example, the picture below shows an analysis of the Pokemon Vespiquen. <strong>This Pokemon is labeled as a “Hard Counter” against Grass type Pokemon because it both deals supereffective damage, and takes not-very-effective damage, when fighting Grass types.</strong></p>
 <p>Plus, the rightmost column of the table tells you which of your Pokemon’s move types deal the most damage against a particular type of enemy.</p>
 <div class="quarto-figure quarto-figure-center">
@@ -215,7 +216,7 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 <p><img src="images/markdown-images/mg-pokemon-team-inspector/5-individual-analysis-defense-summary.png" class="img-fluid figure-img" width="600"></p>
 </figure>
 </div>
-<p>Finally, the most useful feature of the app is its ability to analyze an entire team of Pokemon, showing you how many of your Pokemon are bad, OK, useful, and optimal against each type of enemy. This can help you think of ways to modify your team to cover a wider range of situations.</p>
+<p>Finally, the most useful feature of the app is the <strong>Analyze Whole Team</strong> page, showing you how many of your Pokemon are bad, OK, useful, and optimal against each enemy type. This can help you think of ways to modify your team to cover a wider range of situations.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/markdown-images/mg-pokemon-team-inspector/6-team-analysis-balanced-main.png" class="img-fluid figure-img" width="600"></p>
@@ -230,6 +231,7 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 <p><img src="images/markdown-images/mg-pokemon-team-inspector/7-team-analysis-balanced-detailed.png" class="img-fluid figure-img" width="600"></p>
 </figure>
 </div>
+<p>The <strong>Team vs Team</strong> page shows a similar analysis, except that you load two teams first, then choose which team is “your” team and which is the “enemy” team. This is useful if you know which Pokemon a gym leader has, for example, and you want to be ready to fight their team.</p>
 <p>This project used the Streamlit framework for web app development, the pandas package for data manipulation, and the Altair package for data visualization.</p>
 <p>Thanks for reading!</p>
 <section id="credits" class="level1">

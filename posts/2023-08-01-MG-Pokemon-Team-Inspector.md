@@ -22,6 +22,7 @@ I've been dissatisfied for a long time with websites that analyze Pokemon based 
 - They don't let you input custom Pokemon with any type combination, move types, and two Abilities of your choice.
 - They make you input the Ability of each Pokemon manually. Some people may not realize that their Pokemon has a Hidden Ability that affects its type matchups.
 - They only use the type effectiveness rules for the latest generation of Pokemon games, making their insights inaccurate to older games.
+- They don't let you assess how useful one team of Pokemon is against another specific team.
 
 **With this in mind, I made an improved web app, which you can access here:**
 
@@ -45,7 +46,7 @@ If you have some Pokemon that are incompatible with the selected generation, the
 
 ![](images/markdown-images/mg-pokemon-team-inspector/3-select-generation.png){fig-align="center" width=700}
 
-Next, you can look at the Analyze Individual Pokemon page. There are three aspects to choose from: Balance, Offense, and Defense. **The Balance aspect considers both the offense and defense of the Pokemon against each possible enemy type.** It displays labels describing the Pokemon's usefulness against each type.
+Next, you can look at the **Analyze Individual Pokemon** page. There are three aspects to choose from: Balance, Offense, and Defense. The Balance aspect considers both the offense and defense of the Pokemon against each possible enemy type. It displays labels describing the Pokemon's usefulness against each type.
 
 For example, the picture below shows an analysis of the Pokemon Vespiquen. **This Pokemon is labeled as a "Hard Counter" against Grass type Pokemon because it both deals supereffective damage, and takes not-very-effective damage, when fighting Grass types.**
 
@@ -59,7 +60,7 @@ Here's the summary for the Defense analysis of one Pokemon:
 
 ![](images/markdown-images/mg-pokemon-team-inspector/5-individual-analysis-defense-summary.png){fig-align="center" width=600}
 
-Finally, the most useful feature of the app is its ability to analyze an entire team of Pokemon, showing you how many of your Pokemon are bad, OK, useful, and optimal against each type of enemy. This can help you think of ways to modify your team to cover a wider range of situations.
+Finally, the most useful feature of the app is the **Analyze Whole Team** page, showing you how many of your Pokemon are bad, OK, useful, and optimal against each enemy type. This can help you think of ways to modify your team to cover a wider range of situations.
 
 ![](images/markdown-images/mg-pokemon-team-inspector/6-team-analysis-balanced-main.png){fig-align="center" width=600}
 
@@ -72,6 +73,8 @@ Also, if I encounter an enemy of a particular type, like Fighting, I can look at
 Under that chart, there is also a "Detailed View" that lets you choose one enemy type and see the exact numbers behind the insights.
 
 ![](images/markdown-images/mg-pokemon-team-inspector/7-team-analysis-balanced-detailed.png){fig-align="center" width=600}
+
+The **Team vs Team** page shows a similar analysis, except that you load two teams first, then choose which team is "your" team and which is the "enemy" team. This is useful if you know which Pokemon a gym leader has, for example, and you want to be ready to fight their team.
 
 This project used the Streamlit framework for web app development, the pandas package for data manipulation, and the Altair package for data visualization.
 
