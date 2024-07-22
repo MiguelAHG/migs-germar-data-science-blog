@@ -52,3 +52,15 @@ Read more about this competition in this [blog post](2021-12-17-agriHanda-Agricu
 I made the [Student Mapping Project](2022-05-10-Student-Mapping-Project.md) under the Programming Varsity (ProgVar) in order to help identify students who live in areas affected by natural hazards.
 
 Under the Data Analytics Committee (DAC), I made the [College Applications Dashboard](2022-07-05-College-Applications-Dashboard.md) to visualize the results of a survey about my schoolmates' college choices and the factors influencing them.
+
+# Passion project: Pokemon Team Inspector
+
+To improve my skills in making web apps with interactive visualizations, I made an app that lets you create, edit, and save Pokemon teams, select a specific Pokemon generation whose rules you want to refer to, and analyze your Pokemon individually or as a team.
+
+Learn more in this [blog post](2023-08-01-MG-Pokemon-Team-Inspector.md).
+
+# Competitions in 2024: Synergy Software Solutions and BlueHacks
+
+This year, I'm an incoming third year in BS Applied Mathematics - Master in Data Science. My team (with five blockmates in our degree program, including myself) participated in Synergy Software Solutions 2024 and Blue Hacks 2024. **We won 1st and 2nd place in these competitions, respectively.**  We had developed a comprehensive personal carbon footprint calculator, as well as a mental health platform for students and guidance counselors.
+
+Read more about it in this [blog post](2024-07-22-BlueHacks-Synergy-Software-Solutions-2024.md).

@@ -4,8 +4,7 @@ aliases:
 author: Migs Germar
 categories:
 - portfolio
-date: '2022-07-10'
-date-modified: "8/1/2023"
+date: '2024-07-22'
 description: A list of my best original works and links to view them.
 layout: post
 permalink: /my-portfolio-projects
@@ -19,6 +18,14 @@ toc: false
 This post lists my portfolio projects, which are my best original works.
 
 Among the blog posts on my website, many of these are "guided projects," meaning that the data and the research ideas were provided by an online course like Dataquest. Guided projects are only partly original, as I put my own unique twist on them. The portfolio projects showcased below, however, are completely original.
+
+# 2024 Synergy Software Solutions and Blue Hacks competitions
+
+My team (with five students of the BS Applied Mathematics - Master in Data Science program at Ateneo, including myself) participated in Synergy Software Solutions 2024 and Blue Hacks 2024. **We won 1st and 2nd place in these competitions, respectively.**  We had developed a comprehensive personal carbon footprint calculator, as well as a mental health platform for students and guidance counselors.
+
+Skills used: Python, data cleaning, data mining/web scraping, dashboard development, interactive data visualization, database operations.
+
+Read more about it in this [blog post](2024-07-22-BlueHacks-Synergy-Software-Solutions-2024.md).
 
 # 2021 Project SPARTA Butuan City Open Data Challenge
 

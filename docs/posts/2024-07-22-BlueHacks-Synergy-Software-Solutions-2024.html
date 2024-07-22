@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Migs Germar">
-<meta name="dcterms.date" content="2022-07-05">
-<meta name="description" content="A timeline of important milestones in my data science learning journey.">
+<meta name="dcterms.date" content="2024-07-22">
+<meta name="description" content="Our team won 1st and 2nd place in two coding competitions, Synergy Software Solutions 2024 and Blue Hacks 2024, respectively. We had developed a comprehensive personal carbon footprint calculator, as well as a mental health platform for students and guidance counselors.">
 
-<title>Migs Germar’s Data Science Blog - 📌 My Learning Journey in Data Science</title>
+<title>Migs Germar’s Data Science Blog - 📌 1st and 2nd place in Two Coding Competitions</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -73,6 +73,8 @@ gtag('js', new Date());
 gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 </script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -124,14 +126,19 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">📌 My Learning Journey in Data Science</h1>
+      <h1 class="title">📌 1st and 2nd place in Two Coding Competitions</h1>
                   <div>
         <div class="description">
-          A timeline of important milestones in my data science learning journey.
+          Our team won 1st and 2nd place in two coding competitions, Synergy Software Solutions 2024 and Blue Hacks 2024, respectively. We had developed a comprehensive personal carbon footprint calculator, as well as a mental health platform for students and guidance counselors.
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">journal</div>
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">competition</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">seaborn</div>
+                <div class="quarto-category">streamlit</div>
+                <div class="quarto-category">git</div>
               </div>
                   </div>
   </div>
@@ -149,7 +156,7 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">July 5, 2022</p>
+        <p class="date">July 22, 2024</p>
       </div>
     </div>
     
@@ -167,48 +174,61 @@ gtag('config', 'G-99SLFW8P3J', { 'anonymize_ip': true});
 
 
 
-<p>Welcome to my timeline of my data science learning journey. I regularly update this post with new milestones.</p>
-<section id="how-i-started-studying-data-science" class="level1">
-<h1>How I started studying data science</h1>
-<p>I first found out about data science in March 2020, around the time that the COVID-19 pandemic started. I decided to take online courses about data science in the summer, in order to see if it was interesting. First, I took the Python Core, Data Science, and Machine learning courses on <a href="https://sololearn.com">Sololearn</a>.</p>
-<p>Here, I learned basic skills in Python, the Spyder IDE, Jupyter Noteboook, SQL basics, and Python packages such as NumPy, pandas, Matplotlib, and Scikit-learn.</p>
-</section>
-<section id="data-science-in-practical-research" class="level1">
-<h1>Data Science in Practical Research</h1>
-<p>When school started again in September 2020, I was able to apply my data science skills in my project for Practical Research class. My group’s research paper was entitled “The Effect of COVID-19’s Consequences on Philippine Frontliners on their Mental Health: A Descriptive, Correlational Study.” We collected survey responses from 196 frontliners. I wrote the entire analysis in Python, from data cleaning to transformation to modeling.</p>
-<p>I had to learn new things in order to do this, including:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/blue-hacks-synergy-2024/synergy-2024-group-photo-01.jpg" class="img-fluid figure-img" width="400"></p>
+</figure>
+</div>
+<center>
+<i>Our team, S1nergy, at Synergy Software Solutions 2024. Left to right: Aames Juriel Morales, Armand Sotelo, Franz Andrei Layug, Val Allen Eltagonde, and Miguel Antonio Germar (me).</i>
+</center>
+<p><br></p>
+<section id="synergy-2024" class="level1">
+<h1>Synergy 2024</h1>
+<p>On June 26, 2024, our team presented the eSUKAT project at Synergy Software Solutions 2024 (hosted in the UP Diliman EEEI) and won first place. We had become a team since we are all incoming 3rd year BS Applied Mathematics - Master in Data Science students at Ateneo. In late May, we worked on a business proposal based on the prompt, <strong>“Design a simple app that allows users to calculate their carbon footprint based on their daily activities, such as transportation, energy use, and food intake.”</strong> This led us to develop an app with the following features implemented:</p>
 <ul>
-<li>Statsmodels, a statistical package in Python</li>
-<li>Dummy-coding categorical variables</li>
-<li>Multiple linear regression</li>
-<li>Testing the assumptions of OLS regression</li>
-<li>Interpreting model results</li>
+<li>eSukat: Emission Trackers
+<ul>
+<li><strong>Food consumption tracker.</strong> You can record your food consumption in the app by selecting food and drink items and indicating how much of it they consumed (in grams, mL, or money spent in Php). You can view and edit your food consumption from the past 14 days. The app calculates the equivalent carbon emissions caused by the production of your food in kilograms of CO<span class="math inline">\(_2\)</span> equivalents. For these calculations, we used emissions factors from <a href="https://www.climatiq.io/data">Climatiq</a>, a database compiling emission factors calculated by credible institutions.</li>
+<li><strong>Electricity tracker.</strong> If you upload a picture of your Meralco bill, the app will read the electricity consumption data from the past two years. You can keep uploading your Meralco bill every month to update the tracker, and you can also type your electricity consumption manually if your bill was not read correctly. Then, the app estimates the corresponding carbon emissions based on the energy mix of nonrenewable and renewable energy types in your electric grid (Luzon, Visayas, or Mindanao).</li>
+<li><strong>Transportation tracker</strong>. After you input your starting point, destination, and mode of transport, the app calculates the distance travelled and the corresponding carbon emissions. If you use multiple modes of transport throughout the day, then you can simply input different trips separately to get an accurate idea of your transport emissions.</li>
+</ul></li>
+<li>eSulong: Data Dashboard
+<ul>
+<li><strong>Personal dashboard</strong>. You can view your carbon emissions from the past year, compare emissions from the past 2 years, or view an analysis of all of the years since you started using the app. The dashboard displays simple and relevant information, such as: a pie chart showing how much of your emissions came from food, electricity, or transport; bar graphs showing how your emissions changed over time; and indicators of how much your emissions have increased or decreased compared to the same month last year, and the equivalent number of native Philippine trees that would be needed to offset those emissions.</li>
+</ul></li>
 </ul>
+<p>Our <a href="https://drive.google.com/file/d/1tOS1G9jkAGhFJ5-CFsboQNaJEYuFE9gv/view?usp=drive_link">business proposal</a> describes the other features we had planned for the app and lists our references for calculating carbon emissions. Also, here is the <a href="https://www.facebook.com/SynergyPH">Synergy Facebook page</a> and a <a href="https://www.facebook.com/share/p/SDzFbBYGbYDbrpf7/">post</a> announcing the winners.</p>
+<p>Our original code repository for the eSUKAT project is private, but a forked version can be publicly viewed here: <a href="https://github.com/MiguelAHG/synergy-eSUKAT-fork4">MiguelAHG/synergy-eSUKAT-fork4</a>.</p>
 </section>
-<section id="dataquest-online-platform" class="level1">
-<h1>Dataquest Online Platform</h1>
-<p>From May 2021 to April 2022, I studied the Data Scientist in Python (DSP) career path on <a href="https://dataquest.io">Dataquest</a>. The courses included many guided projects in Jupyter Notebook, some of which have been posted on my blog.</p>
-<p>Read more about what I learned from the DSP path in this <a href="../posts/2022-04-16-Online-Course-Dataquest-Data-Scientist-Python.html">blog post</a>.</p>
-</section>
-<section id="project-sparta-butuan-city-open-data-challenge" class="level1">
-<h1>2021 Project SPARTA Butuan City Open Data Challenge</h1>
-<p>I led a team to participate in this competition from June to November of 2021. I developed agriHanda, an agricultural disaster risk dashboard for Butuan City, Philippines. For this, we won the Second Placer award and Best in Ingenious Solution award.</p>
-<p>Read more about this competition in this <a href="../posts/2021-12-17-agriHanda-Agricultural-Disaster-Risk-Web-App.html">blog post</a>.</p>
-</section>
-<section id="data-science-projects-in-grade-12" class="level1">
-<h1>Data science projects in Grade 12</h1>
-<p>I made the <a href="../posts/2022-05-10-Student-Mapping-Project.html">Student Mapping Project</a> under the Programming Varsity (ProgVar) in order to help identify students who live in areas affected by natural hazards.</p>
-<p>Under the Data Analytics Committee (DAC), I made the <a href="../posts/2022-07-05-College-Applications-Dashboard.html">College Applications Dashboard</a> to visualize the results of a survey about my schoolmates’ college choices and the factors influencing them.</p>
-</section>
-<section id="passion-project-pokemon-team-inspector" class="level1">
-<h1>Passion project: Pokemon Team Inspector</h1>
-<p>To improve my skills in making web apps with interactive visualizations, I made an app that lets you create, edit, and save Pokemon teams, select a specific Pokemon generation whose rules you want to refer to, and analyze your Pokemon individually or as a team.</p>
-<p>Learn more in this <a href="../posts/2023-08-01-MG-Pokemon-Team-Inspector.html">blog post</a>.</p>
-</section>
-<section id="competitions-in-2024-synergy-software-solutions-and-bluehacks" class="level1">
-<h1>Competitions in 2024: Synergy Software Solutions and BlueHacks</h1>
-<p>This year, I’m an incoming third year in BS Applied Mathematics - Master in Data Science. My team (with five blockmates in our degree program, including myself) participated in Synergy Software Solutions 2024 and Blue Hacks 2024. <strong>We won 1st and 2nd place in these competitions, respectively.</strong> We had developed a comprehensive personal carbon footprint calculator, as well as a mental health platform for students and guidance counselors.</p>
-<p>Read more about it in this <a href="../posts/2024-07-22-BlueHacks-Synergy-Software-Solutions-2024.html">blog post</a>.</p>
+<section id="blue-hacks-2024" class="level1">
+<h1>Blue Hacks 2024</h1>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/markdown-images/blue-hacks-synergy-2024/blue-hacks-2024-group-photo-01.jpg" class="img-fluid figure-img" width="400"></p>
+</figure>
+</div>
+<center>
+<i>Our team, S1, at Blue Hacks 2024. I’m the one in a green sweater.</i>
+</center>
+<p><br></p>
+<p>Earlier this year, I had also joined Blue Hacks 2024 with the same team. This was an overnight hackathon hosted in Ateneo; we had 24 hours to make <strong>an app that helps people with their mental health</strong>. We got 2nd place for Bughaw, an online mental health platform meant to be set up within a school community. It has the following features:</p>
+<ul>
+<li>Student Portal
+<ul>
+<li><strong>Schedule appointment</strong>. You can quickly schedule an appointment with a guidance counselor based on their available time slots. Requirements like submitting student information and choosing a schedule in a calendar are all done on one page in the app. Our rationale was that the current way of scheduling a counseling appointment in Ateneo is rather confusing.</li>
+<li><strong>Chat with guidance counselor</strong>. This is a private chat between the student and their assigned counselor, to ease communication regarding scheduling and counseling matters without having to use personal accounts on messaging platforms.</li>
+<li><strong>Support group chat</strong>. If the school decides to group students into online support groups, this feature of the app lets them communicate anonymously, and it is set up so that each group has a guidance counselor to moderate the chat.</li>
+<li><strong>Brief mental health surveys</strong>. There is a daily mood tracker, as well as more specific surveys on mental health disorder symptoms which the app can ask students to do once per few weeks or a month.</li>
+<li><strong>Mental health resources.</strong> One feature is a regularly updated feed of mental health-related articles and research from different websites, implemented via RSS. There is also a feature that lets you select which negative emotion you want to reduce and gives tips on how to do that.</li>
+</ul></li>
+<li>Guidance Counselor Portal
+<ul>
+<li>This lists the counselor’s scheduled appointments, enables the counselor to chat with their assigned students and chat in the support group chat they are moderating, and view anonymized aggregated results of the brief mental health surveys.</li>
+</ul></li>
+</ul>
+<p>Here is the <a href="https://www.facebook.com/BlueHacksAdMU">Blue Hacks page</a> and a <a href="https://www.facebook.com/share/p/TZuFsutfEhH3RhfN/">post</a> announcing the winners.</p>
+<p>Our official code repository for the Bughaw project is not publicly available because it is in the account of the event organizers. A mirror of the repository, which we set up for test-deploying the app online, is here: <a href="https://github.com/MiguelAHG/sigma-one-test">MiguelAHG/sigma-one-test</a>.</p>
 
 
 </section>
